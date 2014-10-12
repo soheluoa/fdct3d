@@ -1,0 +1,2 @@
+g++ -o test -g -c -o -Wall -W -Wno-sign-compare -Wno-unused-label -MMD -I/usr/local/include/                                 		      -O3 -DEBUG test.o libfdct3d.a -L/usr/local/lib/                                  -lfftw3	     
+./test options
