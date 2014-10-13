@@ -34,21 +34,13 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   DblOffVec sma1(S1);  fdct3d_lowpass(Lh1, sma1);
   DblOffVec sma2(S2);  fdct3d_lowpass(Lh2, sma2);
   DblOffVec sma3(S3);  fdct3d_lowpass(Lh3, sma3);
-
-  //CpxOffTns G(S1,S2,S3);
-  //for(int i=-F1; i<-F1+S1; i++)
-  //for(int j=-F2; j<-F2+S2; j++)
-  //for(int k=-F3; k<-F3+S3; k++) {
-  //double ss = sma1(i)*sma2(j)*sma3(k);				  double bb = big1(i)*big2(j)*big3(k);
-  //G(i,j,k) = O(i,j,k) * bb * sqrt(1.0-ss*ss);
-  //}
   
   double W1 = L1/nd;  double W2 = L2/nd;  double W3 = L3/nd;
   
   typedef pair<int,int> intpair;
   typedef pair<int, intpair> inttriple;
   map<inttriple, fftw_plan> planmap;
-  
+
   //face 0: x,y,z
   for(int h=0; h<nd; h++) { //(y first z second)
 	 for(int g=0; g<nd; g++) {
@@ -124,10 +116,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
 			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 //int bi,bj,bk;			 int oi,oj,ok;			 fdct3d_position_aux(N1,N2,N3,b, xcur,ycur,zcur, bi,bj,bk,oi,oj,ok);
-			 //CpxNumTns& Wblk = W.block(bi,bj,bk);
-			 //wpdata(tmpx, tmpy, tmpz) = Wblk(oi,oj,ok) * bb * sqrt(1.0-ss*ss);				  //pou1(xcur)*pou2(ycur)*pou3(zcur);
-
 			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
 
 			 double thtcur = atan2(ycur/R2, xcur/R1);
@@ -190,20 +178,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 
 	   fftw_plan p = NULL;
-	   map<inttriple, fftw_plan>::iterator mit = planmap.find( inttriple(xn, intpair(yn,zn)) );
-
-/*
-	   if(mit!=planmap.end())
-	   {
-		   p = (*mit).second;
-	   }
-	   else
-	   {
-*/
-		 p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-		// planmap[ inttriple(xn, intpair(yn,zn)) ] = p;
-	  // }
-
+	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
 	   fftw_execute(p);		  		//cerr<<"wedge s"<<endl;
 
 	   double sqrtprod = sqrt(double(xn*yn*zn));
@@ -213,11 +188,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
-
-	   //store
-	   //CpxNumTns& Cblk = C.block(s,wcnt);
-	   //Cblk = tpdata;
-
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -292,10 +262,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
 			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 //int bi,bj,bk;			 int oi,oj,ok;			 fdct3d_position_aux(N1,N2,N3,b, xcur,ycur,zcur, bi,bj,bk,oi,oj,ok);
-			 //CpxNumTns& Wblk = W.block(bi,bj,bk);
-			 //wpdata(tmpx, tmpy, tmpz) = Wblk(oi,oj,ok) * bb * sqrt(1.0-ss*ss);				  //pou1(xcur)*pou2(ycur)*pou3(zcur);
-
 			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
 			 double thtcur = atan2(zcur/R3, ycur/R2);
 			 double phicur = atan2(xcur/R1, ycur/R2);
@@ -348,19 +314,9 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 
 	   fftw_plan p = NULL;
-	   map<inttriple, fftw_plan>::iterator mit = planmap.find( inttriple(xn, intpair(yn,zn)) );
-
-/*	   if(mit!=planmap.end())
-	   {
-		   p = (*mit).second;
-	   }
-	   else
-	   {*/
-		   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	//	   planmap[ inttriple(xn, intpair(yn,zn)) ] = p;
-    //   }
-
+	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
 	   fftw_execute(p);		  //cerr<<"wedge s"<<endl;
+
 	   double sqrtprod = sqrt(double(xn*yn*zn));
 	   for(int i=0; i<xn; i++)
 		   for(int j=0; j<yn; j++)
@@ -368,11 +324,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
-
-	   //store
-	   //CpxNumTns& Cblk = C.block(s,wcnt);
-	   //Cblk = tpdata;
-
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -432,10 +383,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
 			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 //int bi,bj,bk;			 int oi,oj,ok;			 fdct3d_position_aux(N1,N2,N3,b, xcur,ycur,zcur, bi,bj,bk,oi,oj,ok);
-			 //CpxNumTns& Wblk = W.block(bi,bj,bk);
-			 //wpdata(tmpx, tmpy, tmpz) = Wblk(oi,oj,ok) * bb * sqrt(1.0-ss*ss);				  //pou1(xcur)*pou2(ycur)*pou3(zcur);
-
 			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
 
 			 double thtcur = atan2(xcur/R1, zcur/R3);
@@ -486,16 +433,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 
 	   fftw_plan p = NULL;
-
-	   map<inttriple, fftw_plan>::iterator mit = planmap.find( inttriple(xn, intpair(yn,zn)) );
-
-	/*   if(mit!=planmap.end()) {
-		   p = (*mit).second;
-	   } else
-	   {*/
-		   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	//	   planmap[ inttriple(xn, intpair(yn,zn)) ] = p;
-	//   }
+	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
 	   fftw_execute(p);		  //cerr<<"wedge s"<<endl;
 
 	   double sqrtprod = sqrt(double(xn*yn*zn));
@@ -505,10 +443,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
-	   //store
-	   //CpxNumTns& Cblk = C.block(s,wcnt);
-	   //Cblk = tpdata;
-
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -576,10 +510,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
 			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 //int bi,bj,bk;			 int oi,oj,ok;			 fdct3d_position_aux(N1,N2,N3,b, xcur,ycur,zcur, bi,bj,bk,oi,oj,ok);
-			 //CpxNumTns& Wblk = W.block(bi,bj,bk);
-			 //wpdata(tmpx, tmpy, tmpz) = Wblk(oi,oj,ok) * bb * sqrt(1.0-ss*ss);				  //pou1(xcur)*pou2(ycur)*pou3(zcur);
-
 			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
 			 double thtcur = atan2(ycur/R2, (-xcur)/R1);
 			 double phicur = atan2(zcur/R3, (-xcur)/R1);
@@ -627,27 +557,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	   CpxNumTns tpdata(xn,yn,zn);
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 	   fftw_plan p = NULL;
-
-       /// Searching for any fftw_plan already in the map
-	   map<inttriple, fftw_plan>::iterator mit = planmap.find( inttriple(xn, intpair(yn,zn)) );
-
-	   //// This is s temporary code; to check the value of tpdata before fftw_execute () //////////////////
-	   int count = 0;
-	   for(int i=0; i<xn; i++)
-		   for(int j=0; j<yn; j++)
-			   for(int k=0; k<zn; k++)
-				   count++;
-	   //// This is s temporary code; to check the value of tpdata before fftw_execute () //////////////////
-
-	  /* if(mit!=planmap.end()) {
-		   p = (*mit).second;
-	   }
-	   else
-	   {*/
-		   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	//	   planmap[ inttriple(xn, intpair(yn,zn)) ] = p;
-	//   }
-
 	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
 	   fftw_execute(p);		  //cerr<<"wedge s"<<endl;
 
@@ -658,11 +567,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
-
-	   //store
-	   //CpxNumTns& Cblk = C.block(s,wcnt);
-	   //Cblk = tpdata;
-	   
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -722,10 +626,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
 			double bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			//int bi,bj,bk;			 int oi,oj,ok;			 fdct3d_position_aux(N1,N2,N3,b, xcur,ycur,zcur, bi,bj,bk,oi,oj,ok);
-			//CpxNumTns& Wblk = W.block(bi,bj,bk);
-			//wpdata(tmpx, tmpy, tmpz) = Wblk(oi,oj,ok) * bb * sqrt(1.0-ss*ss);				  //pou1(xcur)*pou2(ycur)*pou3(zcur);
-
 			wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
 
 			double thtcur = atan2(zcur/R3, (-ycur)/R2);
@@ -773,15 +673,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	  fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 	  fftw_plan p = NULL;
 
-	  map<inttriple, fftw_plan>::iterator mit = planmap.find( inttriple(xn, intpair(yn,zn)) );
-
-/*	  if(mit!=planmap.end()) {
-		  p = (*mit).second;
-	  } else
-	  {*/
-		  p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	//	  planmap[ inttriple(xn, intpair(yn,zn)) ] = p;
-	//  }
+	  p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
 	  fftw_execute(p);		  //cerr<<"wedge s"<<endl;
 
 	  double sqrtprod = sqrt(double(xn*yn*zn));
@@ -791,11 +683,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				  tpdata(i,j,k) /= sqrtprod;
 
 	  fftw_destroy_plan(p);
-
-	  //store
-	  //CpxNumTns& Cblk = C.block(s,wcnt);
-	  //Cblk = tpdata;
-
 	  csc[wcnt] = tpdata;
 	  wcnt++;
 	}
@@ -854,10 +741,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
 			double bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			//int bi,bj,bk;			 int oi,oj,ok;			 fdct3d_position_aux(N1,N2,N3,b, xcur,ycur,zcur, bi,bj,bk,oi,oj,ok);
-			//CpxNumTns& Wblk = W.block(bi,bj,bk);
-			//wpdata(tmpx, tmpy, tmpz) = Wblk(oi,oj,ok) * bb * sqrt(1.0-ss*ss);				  //pou1(xcur)*pou2(ycur)*pou3(zcur);
-
 			wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
 			double thtcur = atan2(xcur/R1, (-zcur)/R3);
 			double phicur = atan2(ycur/R2, (-zcur)/R3);
@@ -903,14 +786,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	  CpxNumTns tpdata(xn,yn,zn);
 	  fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 	  fftw_plan p = NULL;
-	  map<inttriple, fftw_plan>::iterator mit = planmap.find( inttriple(xn, intpair(yn,zn)) );
-
-	  /*if(mit!=planmap.end()) {
-		  p = (*mit).second;
-	  } else {*/
-		  p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	//    planmap[ inttriple(xn, intpair(yn,zn)) ] = p;
-	//  }
+	  p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
 	  fftw_execute(p);		  //cerr<<"wedge s"<<endl;
 
 	  double sqrtprod = sqrt(double(xn*yn*zn));
@@ -921,10 +797,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 
 	  fftw_destroy_plan(p);
 
-	  //store
-	  //CpxNumTns& Cblk = C.block(s,wcnt);
-	  //Cblk = tpdata;
-
 	  csc[wcnt] = tpdata;
 	  wcnt++;
 	}
@@ -932,17 +804,6 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 
   assert(wcnt==nd*nd*nf);
 
-  //double sum = 0;
-  //for(int k=0; k<wcnt; k++)	sum = sum+energy(csc[k]);
-  //cerr<<energy(G)<<" "<<sum<<" "<<energy(G)-sum<<endl;
-  
-  //remove plans
-  /*for(map<inttriple, fftw_plan>::iterator mit=planmap.begin(); mit!=planmap.end(); mit++)
-  {
-	fftw_plan p = (*mit).second;
-	//fftw_destroy_plan(p);
-  }*/
-  
   return 0;
 }
 
@@ -1149,6 +1010,5 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
 	  fdct3d_forward_wavelet(L1,L2,L3,s, O, C);
 	}
   }
-  
   return 0;
 }

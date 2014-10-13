@@ -70,27 +70,27 @@ int main(int argc, char** argv)
   // Class of NumTns *********************************************************************************
   CpxNumTns x(m,n,p);
 
-  for(int i=0; i<m; i++)	 
-	for(int j=0; j<n; j++)		
-		for(int k=0; k<p; k++)		  
+  for(int i=0; i<m; i++)
+	for(int j=0; j<n; j++)
+		for(int k=0; k<p; k++)
 		{
 			x(i,j,k) =  cpx(drand48()-0.5,drand48());
 			std::cout << x(i,j,k)  <<std::endl;
 		}
-    
+
   tm0 = time(NULL);
 
   vector< vector<double> > fxs,fys,fzs;
   vector< vector<int> > nxs,nys,nzs;
   fdct3d_param(m, n, p, nbscales, nbdstz_coarse,ac,fxs,fys,fzs,nxs,nys,nzs);
-  tm1 = time(NULL);  
+  tm1 = time(NULL);
   cout<<"fdct3d_param "<<difftime(tm1,tm0)<<" seconds"<<endl;  tm0 = tm1;
   
   // Vector of class NumTns with complex double type ***************************************************
   vector< vector<CpxNumTns> > c;
 
   fdct3d_forward(m, n, p, nbscales, nbdstz_coarse, ac, x, c);
-  tm1 = time(NULL);  
+  tm1 = time(NULL);
   cout<<"fdct3d_forward "<<difftime(tm1,tm0)<<" seconds"<<endl;  tm0 = tm1;
   
   CpxNumTns newx(x);
@@ -98,14 +98,14 @@ int main(int argc, char** argv)
   fdct3d_inverse(m, n, p, nbscales, nbdstz_coarse, ac, c, newx);
 
   //std::cout << (c(0,0)) << std::endl;
-  tm1 = time(NULL);  
-  cout<<"fdct3d_inverse "<<difftime(tm1,tm0)<<" seconds"<<endl;  
+  tm1 = time(NULL);
+  cout<<"fdct3d_inverse "<<difftime(tm1,tm0)<<" seconds"<<endl;
   tm0 = tm1;  //cerr<<energy(newx)<<endl;
   
   double mv = 0.0;
   double sum = 0.0;
-  for(int i=0; i<m; i++)	
- 	for(int j=0; j<n; j++)		
+  for(int i=0; i<m; i++)
+ 	for(int j=0; j<n; j++)
 		for(int k=0; k<p; k++)
 		{
 			mv = max(mv, abs(newx(i,j,k)-x(i,j,k)));
