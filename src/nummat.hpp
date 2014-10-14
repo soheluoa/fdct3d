@@ -63,7 +63,8 @@ template <class F> inline istream& operator>>(istream& is, NumMat<F>& mat)
 //OUTPUT
 template <class F> inline ostream& operator<<(ostream& os, const NumMat<F>& mat)
 {
-  os<<mat.m()<<" "<<mat.n()<<endl;
+  os<<mat.m()<<" "<<mat.n();
+  cout << endl;
   os.setf(ios_base::scientific, ios_base::floatfield);
   for(int i=0; i<mat.m(); i++) {
 	 for(int j=0; j<mat.n(); j++)

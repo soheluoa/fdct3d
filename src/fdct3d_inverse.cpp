@@ -728,7 +728,6 @@ int fdct3d_inverse_angles(double L1,double L2,double L3, int s,int nd, vector< v
 				  O(xcur,ycur,zcur) += wpdata(tmpx,tmpy,tmpz)  * bb * sqrt(1.0-ss*ss);
 				}
 		  }//zcur
-
 		wcnt++;
 	 }
   }//end of face

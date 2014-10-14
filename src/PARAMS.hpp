@@ -9,6 +9,8 @@
 #define PARAMS_HPP_
 
 #include <vector>
+#include "fdct3d.hpp"
+#include "fdct3dinline.hpp"
 
 class PARAMS{
 
@@ -16,9 +18,9 @@ public:
 	      int Nw;
 	      int Kx;
 	      int Ky;
+	      int nbscales, nbdstz_coarse, ac;
 	      std::vector<std::vector<int > > samplMat;
 	      std::vector<std::vector<int > > cellSize;
-	      std::vector<std::vector<std::vector<double > > > curvCoeff;
 	      std::vector<std::vector<std::vector<double > > > tempCurvCoeff;
 	      std::vector<std::vector<std::vector<double > > > tempModel;
 	      std::vector<std::vector<std::vector<double > > > tempDiffCurvCoeff;
@@ -27,13 +29,17 @@ public:
 	      std::vector<std::vector<std::vector<double > > > reconData;
 	      std::vector<std::vector<std::vector<double > > > tempData;
 	      std::vector<std::vector<std::vector<double > > > newModel;
+	      std::vector< std::vector<double> > fxs,fys,fzs;
+	      std::vector< std::vector<int> > nxs,nys,nzs;
 	      std::vector<int > cellStruct;
+
+	      // Vector of class NumTns with complex double type ***************************************************
+
 
 	      void reset()
 	      {
 	      		samplMat.clear();
 	      		cellSize.clear();
-	      		curvCoeff.clear();
 	      		inData.clear();
 	      		obsData.clear();
 	      		tempCurvCoeff.clear();
@@ -43,6 +49,12 @@ public:
 	      		tempDiffCurvCoeff.clear();
 	      		cellStruct.clear();
 	      		reconData.clear();
+	      		fxs.clear();
+	      		fys.clear();
+	      		fzs.clear();
+	      		nxs.clear();
+	      		nys.clear();
+	      		nzs.clear();
 	      }
 };
 

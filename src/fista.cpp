@@ -19,9 +19,36 @@
 #include "fistaParams.hpp"
 #include "fistaCore.hpp"
 #include "PARAMS.hpp"
+#include "fdct3d.hpp"
+#include "fdct3dinline.hpp"
+
 #include <cmath>
 
-int main()
+
+int optionsCreate(const char* optfile, map<string,string>& options)
+{
+
+  options.clear();
+  ifstream fin(optfile);
+  fin.open("/home/entropy/workspace/fdct3d/src/params.txt");
+  std::cout << optfile << std::endl;
+  std::cout <<fin.fail()  << std::endl;
+  assert(fin.good());
+
+  string name;
+  fin>>name;
+
+  while(fin.good()) {
+	 char cont[100];
+	 fin.getline(cont, 99);
+	 options[name] = string(cont);
+	 fin>>name;
+  }
+  fin.close();
+  return 0;
+}
+
+int main(int argc, char** argv)
 {
    clock_t start, finish;
 
@@ -43,14 +70,36 @@ int main()
    fsp.sampleMatFileName = "/home/entropy/workspace/fista/src/sample_mat.bin";
    fsp.outDataFileName = "reconData.bin";
 
-   /* Data initialisation for 3D FFT */
+   /* Data initialisation for 3D FFT ****************************************************/
    params.Nw = pow(2,ceil(log10(fsp.n1)/log10(2)));
    params.Kx = pow(2,ceil(log10(fsp.n2)/log10(2)));
    params.Ky = pow(2,ceil(log10(fsp.n3)/log10(2)));
+   params.ac = 0;
 
    fsp.thresh = fsp.lambda/(2*fsp.alpha);
 
-   /** Executing spgl1 optimisation code to reconstruct seismic data *********************/
+   assert(argc==3);
+   map<string, string> opts;
+   optionsCreate(argv[2], opts);
+   map<string,string>::iterator mi;
+
+   mi = opts.find("-m");
+   assert(mi!=opts.end());
+   {istringstream ss((*mi).second); ss>>fsp.n1;}
+
+   mi = opts.find("-n"); assert(mi!=opts.end());
+   {istringstream ss((*mi).second); ss>>fsp.n2;}
+
+   mi = opts.find("-p"); assert(mi!=opts.end());
+   {istringstream ss((*mi).second); ss>>fsp.n3;}
+
+   mi = opts.find("-nbscales"); assert(mi!=opts.end());
+   {istringstream ss((*mi).second); ss>>params.nbscales;}
+
+   mi = opts.find("-nbdstz_coarse"); assert(mi!=opts.end());
+   {istringstream ss((*mi).second); ss>>params.nbdstz_coarse;}
+
+   /** Executing FISTA optimisation code to reconstruct seismic data *********************/
    start = clock();
    fsc.Execute(&fsp, &params, &fsc);
    finish = clock();

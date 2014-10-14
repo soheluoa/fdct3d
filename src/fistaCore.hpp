@@ -23,9 +23,9 @@
 #include <vector>
 
 #include "fistaParams.hpp"
+#include "fdct3d.hpp"
+#include "fdct3dinline.hpp"
 #include "PARAMS.hpp"
-
-
 
 class fistaCore{
 
@@ -36,6 +36,7 @@ class fistaCore{
 
 	public:
 			void Execute(fistaParams *fsp, PARAMS* params, fistaCore* fsc);
+			void aprod(fistaParams* fsp, PARAMS* params, int operatorType);
 
 	/**
 	 * Access modifier of these methods are made private to prohibit the execution of these functions from anywhere except the object of this class
@@ -48,18 +49,13 @@ class fistaCore{
 
 			int computeObsData(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<std::vector<double> > > &data, std::vector<std::vector<int > > &sampleMat, std::vector<std::vector<std::vector<double> > > &obsData);
 
-			/// x, and g are the curvelet/waveatom coefficients ///
-			//void spgLineCurvy(double f, std::vector<std::vector<std::vector<double > > >x, std::vector<std::vector<std::vector<double > > >dx, double gtd, double fMax, std::vector<std::vector<std::vector<double > > >data);
-
 			void project(std::vector<std::vector<std::vector<double > > >x, double tau);
 
 			int spLine(double f, std::vector<std::vector<std::vector<double > > >x, std::vector<std::vector<std::vector<double > > >dx, double gtd, double fMax, std::vector<std::vector<std::vector<double> > > data);
 
-			void aprod(fistaParams* fsp, PARAMS* params, int operatorType);
-
 			double norm(std::vector<std::vector<int > >&x, int normType);
 
-			void wthresh(int n1, int n2, int n3, vector<vector<vector<double> > > &data, double thresh, std::vector<std::vector<std::vector<double > > >&x);
+			void wthresh(int n1, int n2, int n3, vector<vector<vector<double> > > &data, double thresh, std::vector< std::vector<CpxNumTns> > &x);
 
 			inline void writeBinFile(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<std::vector<double> > > &data);
 

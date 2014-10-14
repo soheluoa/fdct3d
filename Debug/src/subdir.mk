@@ -13,19 +13,22 @@ CPP_SRCS += \
 ../src/fdct3d_forward.cpp \
 ../src/fdct3d_inverse.cpp \
 ../src/fdct3d_param.cpp \
-../src/test.cpp 
+../src/fista.cpp \
+../src/fistaCore.cpp 
 
 OBJS += \
 ./src/fdct3d_forward.o \
 ./src/fdct3d_inverse.o \
 ./src/fdct3d_param.o \
-./src/test.o 
+./src/fista.o \
+./src/fistaCore.o 
 
 CPP_DEPS += \
 ./src/fdct3d_forward.d \
 ./src/fdct3d_inverse.d \
 ./src/fdct3d_param.d \
-./src/test.d 
+./src/fista.d \
+./src/fistaCore.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
