@@ -48,24 +48,30 @@ void fistaCore::Execute(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 				   data(i,j,k) =  cpx(params->inData[i][j][k],0);
 
 		fdct3d_param(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse,params->ac,params->fxs,params->fys,params->fzs, params->nxs,params->nys,params->nzs);
-
 		fdct3d_forward(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, data, curvCoeff, params->cellStruct);
 		fdct3d_inverse(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, curvCoeff, dataOut);
 
-        int count = 0;
+		/*Traversing the curvelet coefficients ************************************************/
 		for (int s1=0; s1<params->cellStruct.size(); s1++)
 			for (int s2=0; s2<params->cellStruct[s1].size(); s2++)
-				for (int s3=0; s3<params->cellStruct[s1][s2].size(); s3++)
-					std::cout<<params->cellStruct[s1][s2][s3]<<" " << count++<<std::endl;
+			{
+				CpxNumTns tmpCoeff(params->cellStruct[s1][s2][0],params->cellStruct[s1][s2][1],params->cellStruct[s1][s2][2]);
+				tmpCoeff = curvCoeff[s1][s2];
+				for (int i=0; i<params->cellStruct[s1][s2][0]; i++)
+					for (int j=0; j<params->cellStruct[s1][s2][1]; j++)
+						for (int k=0; k<params->cellStruct[s1][s2][2]; k++)
+							tmpCoeff(i,j,k)/=1.0;
+				curvCoeff[s1][s2] = tmpCoeff;
+				tmpCoeff.~NumTns();
+			}
+		fdct3d_inverse(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, curvCoeff, dataOut);
 
-		  /*double mv = 0.0;
-		  for(int i=0; i<fsp->n1; i++)
-		 	for(int j=0; j<fsp->n2; j++)
-				for(int k=0; k<fsp->n3; k++)
-					mv = max(mv, abs(dataOut(i,j,k)-data(i,j,k)));
-		  cerr<<"max error "<<mv<<endl;*/
-
-
+	  /*double mv = 0.0;
+	  for(int i=0; i<fsp->n1; i++)
+		for(int j=0; j<fsp->n2; j++)
+			for(int k=0; k<fsp->n3; k++)
+				mv = max(mv, abs(dataOut(i,j,k)-data(i,j,k)));
+	  cerr<<"max error "<<mv<<endl;*/
 
 		/*for(int i=0; i<params->Nw; i++)
 			for(int j=0; j<params->Kx; j++)
