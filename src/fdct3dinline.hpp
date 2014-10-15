@@ -1,7 +1,14 @@
-/* FDCT3D (Fast 3d Curvelet Transform)
-   Copyright (C) 2004 Caltech
+/*
+    FDCT3D (Fast 3d Curvelet Transform)
 	Written by Lexing Ying
+
+	Updated by: Sohel Bhuiyan (2014)
+				University of Alberta
+	   	   	   	Upgraded from FFTW 2.1.5 to FFTW 3.3.3
+	   	   	    Solved the memory leaking problem in FFTW 3.3.3
+	   	   	    Plugged in with FISTA Algorithm
 */
+
 
 #ifndef _FDCT3DINLINE_HPP_
 #define _FDCT3DINLINE_HPP_

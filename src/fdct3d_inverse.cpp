@@ -1,10 +1,12 @@
-/* FDCT3D (Fast 3d Curvelet Transform)
-   Written by Lexing Ying
+/*
+    FDCT3D (Fast 3d Curvelet Transform)
+	Written by Lexing Ying
 
-   Updated by: Sohel Bhuiyan (2014)
-			   University of Alberta
-	   	   	   Upgrade from FFTW 2.1.5 to FFTW 3.3.3
-	           Solved the memory leaking problem in FFTW 3.3.3
+	Updated by: Sohel Bhuiyan (2014)
+				University of Alberta
+	   	   	   	Upgraded from FFTW 2.1.5 to FFTW 3.3.3
+	   	   	    Solved the memory leaking problem in FFTW 3.3.3
+	   	   	    Plugged in with FISTA Algorithm
 */
 
 #include "fdct3d.hpp"
@@ -16,7 +18,10 @@ int fdct3d_inverse_angles(double L1,double L2,double L3, int s,int nd, vector< v
   
   int nf = 6;
   int wcnt = 0;
-  int S1, S2, S3;	 int F1, F2, F3;	 double R1, R2, R3;
+  int S1, S2, S3;
+  int F1, F2, F3;
+  double R1, R2, R3;
+
   fdct3d_rangecompute(L1, L2, L3, S1, S2, S3, F1, F2, F3, R1, R2, R3);
 
   DblOffVec big1(S1);  fdct3d_lowpass(L1, big1);
@@ -93,7 +98,6 @@ int fdct3d_inverse_angles(double L1,double L2,double L3, int s,int nd, vector< v
 				  for(int k=0; k<zn; k++)
 					  tpdata(i,j,k) /= sqrtprod;
 
-
 		  CpxOffTns wpdata(xn,yn,zn);
 		  fdct3d_fftshift(xn,yn,zn,tpdata,wpdata);
 		  
@@ -153,7 +157,6 @@ int fdct3d_inverse_angles(double L1,double L2,double L3, int s,int nd, vector< v
 				  O(xcur,ycur,zcur) += wpdata(tmpx,tmpy,tmpz)  * bb * sqrt(1.0-ss*ss);
 				}
 		  }
-
 		wcnt++;
 	 }
   } //end of face

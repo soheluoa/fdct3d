@@ -30,36 +30,44 @@ void fistaCore::Execute(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 	if(chkDataFile == 1)
 	{
 		double tmpt, temp;
-		CpxNumTns data(fsp->n1,fsp->n2,fsp->n3);
+		CpxNumTns data(fsp->n3,fsp->n2,fsp->n1);
 		std::vector< std::vector<CpxNumTns> > curvCoeff;
+		CpxNumTns dataOut(data);
+		clear(dataOut);
 
 		computeObsData(fsp->sampleMatFileName, fsp->n1, fsp->n2, fsp->n3, params->inData, params->samplMat, params->obsData);
 
 		/*Write the reconstructed seismic data ********************************/
 		writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, params->inData);
 
-		writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, params->obsData);
+		//writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, params->obsData);
 
-		for(int i=0; i<fsp->n1; i++)
+		for(int i=0; i<fsp->n3; i++)
 		   for(int j=0; j<fsp->n2; j++)
-			   for(int k=0; k<fsp->n3; k++)
-			   {
-				   //std::cout <<params->inData[i][j][k] <<std::endl;
-				   data(i,j,k) =  cpx(drand48()-0.5,0);
-			   }
+			   for(int k=0; k<fsp->n1; k++)
+				   data(i,j,k) =  cpx(params->inData[i][j][k],0);
 
 		fdct3d_param(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse,params->ac,params->fxs,params->fys,params->fzs, params->nxs,params->nys,params->nzs);
 
-		CpxNumTns dataOut(data);
-		clear(dataOut);
-
-		/* x = A'y; input: params->obsData, output: params->curvCoeff */
-		fdct3d_forward(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, data, curvCoeff);
-		//aprod(fsp, params, 1);
+		fdct3d_forward(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, data, curvCoeff, params->cellStruct);
 		fdct3d_inverse(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, curvCoeff, dataOut);
 
-/*
-		for(int i=0; i<params->Nw; i++)
+        int count = 0;
+		for (int s1=0; s1<params->cellStruct.size(); s1++)
+			for (int s2=0; s2<params->cellStruct[s1].size(); s2++)
+				for (int s3=0; s3<params->cellStruct[s1][s2].size(); s3++)
+					std::cout<<params->cellStruct[s1][s2][s3]<<" " << count++<<std::endl;
+
+		  /*double mv = 0.0;
+		  for(int i=0; i<fsp->n1; i++)
+		 	for(int j=0; j<fsp->n2; j++)
+				for(int k=0; k<fsp->n3; k++)
+					mv = max(mv, abs(dataOut(i,j,k)-data(i,j,k)));
+		  cerr<<"max error "<<mv<<endl;*/
+
+
+
+		/*for(int i=0; i<params->Nw; i++)
 			for(int j=0; j<params->Kx; j++)
 				for(int k=0; k<params->Ky; k++)
 				{
@@ -67,23 +75,24 @@ void fistaCore::Execute(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 					params->tempCurvCoeff[i][j][k] = params->curvCoeff[i][j][k];
 				}
 
-		for(int i=0; i<fsp->maxItr; i++)
+		for(int itrNum=0; itrNum<fsp->maxItr; itrNum++)
 		{
 			for(int i=0; i<params->Nw; i++)
 				for(int j=0; j<params->Kx; j++)
 					for(int k=0; k<params->Ky; k++)
 						params->tempModel[i][j][k] = params->curvCoeff[i][j][k];
 
-			 y = Ax; Hx; input: params->tempCurvCoeff, output: params->tempData
-			aprod(fsp, params, 1);
+			// y = Ax; Hx; input: params->tempCurvCoeff, output: params->tempData
+			fdct3d_inverse(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, curvCoeff, dataOut);
+
 
 			for(int i=0; i<fsp->n3; i++)
 				for(int j=0; j<fsp->n2; j++)
 					for(int k=0; k<fsp->n1; k++)
 						params->tempData[i][j][k] = (params->obsData[i][j][k] - params->tempData[i][j][k]);
 
-			 x = A'y; y = y - Hx; input: params->tempData, output: params->tempDiffCurvCoeff
-			aprod(fsp, params, -1);
+			// x = A'y; y = y - Hx; input: params->tempData, output: params->tempDiffCurvCoeff
+			fdct3d_forward(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, data, curvCoeff);
 
 			for(int i=0; i<params->Nw; i++)
 				for(int j=0; j<params->Kx; j++)
@@ -103,16 +112,18 @@ void fistaCore::Execute(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 					for(int k=0; k<params->Ky; k++)
 						params->tempCurvCoeff[i][j][k] = params->curvCoeff[i][j][k] + temp* (params->curvCoeff[i][j][k] - params->tempModel[i][j][k]);
 
+			std::cout << "Iteration completed" <<itrNum <<std::endl;
 		}
 
-		 y = Ax; input: params->tempCurvCoeff, output: params->reconData
-		aprod(fsp, params, 1);
+		// y = Ax; input: params->tempCurvCoeff, output: params->reconData
+		fdct3d_inverse(fsp->n1,fsp->n2,fsp->n3,params->nbscales,params->nbdstz_coarse, params->ac, curvCoeff, dataOut);
 
-		 Writing the binary file for the reconstructed data
+		// Writing the binary file for the reconstructed data
 		writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, params->reconData);
 		system("reconCube.sh");
+
+		normVal = norm(params->samplMat, normType);
 */
-		//normVal = norm(params->samplMat, normType);
 	}
 	else
 		std::cout << "Please check whether the path of binary files are correct or not. " <<std::endl;
@@ -146,9 +157,7 @@ inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, 
 			{
 			   data[i].push_back(vector<double> ());
 			   for(int k=0; k<n1; k++)
-			   {
 				   data[i][j].push_back(temp[i*n2*n1+j*n1+k]);
-			   }
 			}
 		 }
     }
@@ -265,7 +274,6 @@ inline void fistaCore::wthresh(int n1, int n2, int n3, vector<vector<vector<doub
 				sgn_data = (data[i][j][k] > 0) ? 1 : ((data[i][j][k] < 0) ? -1 : 0);
 				//x[i][j][k]   = sgn_data*temp;
 			}
-
 }
 
 

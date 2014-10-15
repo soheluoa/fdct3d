@@ -1,16 +1,10 @@
-/*
- * spgl1.cpp
- *
- *  Created on: Sep 12, 2014
- *      Author: entropy
- */
 
 /*  =================================================================================
- *  Name        : Migration.cpp (Phase Shift Migration Plus Interpolation and others)
+ *  Name        : Fista.cpp
  *  Author      : Sohel Bhuiyan
- *  Version     : 0.1
+ *  Version     : 1.0
  *  Purpose     : Generate the migrated image of the velocity model using PSPI method
- *  Date        : Feb 18, 2014 - implementation for PSPI poststack method
+ *  Date        : September 12, 2014
  *  Affiliation : University of Alberta, Physics department (SAIG)
  *  Email       : mbhuiyan@ualberta.ca
  * ===================================================================================
@@ -21,13 +15,10 @@
 #include "PARAMS.hpp"
 #include "fdct3d.hpp"
 #include "fdct3dinline.hpp"
-
 #include <cmath>
-
 
 int optionsCreate(const char* optfile, map<string,string>& options)
 {
-
   options.clear();
   ifstream fin(optfile);
   fin.open("/home/entropy/workspace/fdct3d/src/params.txt");
@@ -61,9 +52,6 @@ int main(int argc, char** argv)
    fsp.bpTol = 0.000001;
    fsp.maxItr = 200;
    fsp.stat = 0;
-   fsp.n1 = 500;
-   fsp.n2 = 36;
-   fsp.n3 =	100;
    fsp.lambda = 1.05;
    fsp.alpha = 2.02;
    fsp.inDataFileName = "/home/entropy/workspace/fista/src/data_gain.bin";

@@ -1,7 +1,14 @@
-/*	FDCT3D (Fast 3d Curvelet Transform)
-   Copyright (C) 2004 Caltech
+/*
+    FDCT3D (Fast 3d Curvelet Transform)
 	Written by Lexing Ying
+
+	Updated by: Sohel Bhuiyan (2014)
+				University of Alberta
+	   	   	   	Upgraded from FFTW 2.1.5 to FFTW 3.3.3
+	   	   	    Solved the memory leaking problem in FFTW 3.3.3
+	   	   	    Plugged in with FISTA Algorithm
 */
+
 
 #ifndef _OFFVEC_HPP_
 #define _OFFVEC_HPP_
@@ -66,10 +73,10 @@ template <class F> inline istream& operator>>(istream& is, OffVec<F>& vec)
 //OUTPUT
 template <class F> inline ostream& operator<<(ostream& os, const OffVec<F>& vec)
 {
-  os<<vec.m()<<" "<<vec.s()<<endl;
+  os<<vec.m()<<" "<<vec.s(); std::cout<<endl;
   os.setf(ios_base::scientific, ios_base::floatfield);
   for(int i=vec.s(); i<vec.s()+vec.m(); i++)
-	 os<<" "<<vec(i)<<endl;
+	 os<<" "<<vec(i); std::cout<<endl;
   return os;
 }
 

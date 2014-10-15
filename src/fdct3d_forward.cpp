@@ -6,16 +6,19 @@
 				University of Alberta
 	   	   	   	Upgraded from FFTW 2.1.5 to FFTW 3.3.3
 	   	   	    Solved the memory leaking problem in FFTW 3.3.3
+	   	   	    Plugged in with FISTA Algorithm
 */
 
 #include "fdct3d.hpp"
 #include "fdct3dinline.hpp"
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOffTns& O, vector< vector<CpxNumTns> >& C)
+int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
   //allocate space
   vector<CpxNumTns>& csc = C[s];
+  cellStruct.push_back(vector<vector<int> > ());
+
   csc.resize(6*nd*nd);
   
   int nf = 6;
@@ -188,6 +191,11 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
+	   cellStruct[s].push_back(vector<int> ());
+	   cellStruct[s][wcnt].push_back(xn);
+	   cellStruct[s][wcnt].push_back(yn);
+	   cellStruct[s][wcnt].push_back(zn);
+
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -197,10 +205,11 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   for(int f=0; f<nd; f++) {
 	 for(int h=0; h<nd; h++) {
 	   
-	   double ys = R2/4-(W2/2)/4;		  double ye = R2;
+	   double ys = R2/4-(W2/2)/4;		      double ye = R2;
 	   double zs = -R3 + (2*h-1)*W3/2;		  double ze = -R3 + (2*h+3)*W3/2;
 	   double xs = -R1 + (2*f-1)*W1/2;		  double xe = -R1 + (2*f+3)*W1/2;
-	   int xn = int(ceil(xe-xs));		  int yn = int(ceil(ye-ys));		  int zn = int(ceil(ze-zs));
+	   int xn = int(ceil(xe-xs));		      int yn = int(ceil(ye-ys));
+	   int zn = int(ceil(ze-zs));
 	   double thts, thtm, thte; //z to y
 
 	   if(h==0) {
@@ -324,6 +333,12 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
+
+	   cellStruct[s].push_back(vector<int> ());
+	   cellStruct[s][wcnt].push_back(xn);
+	   cellStruct[s][wcnt].push_back(yn);
+	   cellStruct[s][wcnt].push_back(zn);
+
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -443,6 +458,12 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
+
+	   cellStruct[s].push_back(vector<int> ());
+	   cellStruct[s][wcnt].push_back(xn);
+	   cellStruct[s][wcnt].push_back(yn);
+	   cellStruct[s][wcnt].push_back(zn);
+
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -567,6 +588,12 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   tpdata(i,j,k) /= sqrtprod;
 
 	   fftw_destroy_plan(p);
+
+	   cellStruct[s].push_back(vector<int> ());
+	   cellStruct[s][wcnt].push_back(xn);
+	   cellStruct[s][wcnt].push_back(yn);
+	   cellStruct[s][wcnt].push_back(zn);
+
 	   csc[wcnt] = tpdata;
 	   wcnt++;
 	 }
@@ -683,6 +710,11 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				  tpdata(i,j,k) /= sqrtprod;
 
 	  fftw_destroy_plan(p);
+	  cellStruct[s].push_back(vector<int> ());
+	  cellStruct[s][wcnt].push_back(xn);
+	  cellStruct[s][wcnt].push_back(yn);
+	  cellStruct[s][wcnt].push_back(zn);
+
 	  csc[wcnt] = tpdata;
 	  wcnt++;
 	}
@@ -797,20 +829,26 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 
 	  fftw_destroy_plan(p);
 
+	  cellStruct[s].push_back(vector<int> ());
+	  cellStruct[s][wcnt].push_back(xn);
+	  cellStruct[s][wcnt].push_back(yn);
+	  cellStruct[s][wcnt].push_back(zn);
+
 	  csc[wcnt] = tpdata;
 	  wcnt++;
 	}
   }//end of face
 
   assert(wcnt==nd*nd*nf);
-
   return 0;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C)
+int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
   vector<CpxNumTns>& csc = C[s];
+  cellStruct.push_back(vector<vector<int> > ());
+  cellStruct[s].push_back(vector<int> ());
   csc.resize(1);
   
   L1 = L1/2;  L2 = L2/2;  L3 = L3/2;
@@ -849,14 +887,20 @@ int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O,
 			  T(i,j,k) /= sqrtprod;
 
   csc[0] = T;
-  
+
+  cellStruct[s][0].push_back(S1);
+  cellStruct[s][0].push_back(S2);
+  cellStruct[s][0].push_back(S3);
+
   return 0;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward_center(double L1, double L2, double L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C)
+int fdct3d_forward_center(double L1, double L2, double L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
   vector<CpxNumTns>& csc = C[s];
+  cellStruct.push_back(vector<vector<int> > ());
+  cellStruct[0].push_back(vector<int> ());
 
   csc.resize(1);
   
@@ -892,14 +936,16 @@ int fdct3d_forward_center(double L1, double L2, double L3, int s, CpxOffTns& O, 
 
  //// CSC is the 1-D vector of class numtns ***********************************************
   csc[0] = T;
+  cellStruct[0][0].push_back(S1);
+  cellStruct[0][0].push_back(S2);
+  cellStruct[0][0].push_back(S3);
   
   return 0;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int ac, CpxNumTns& X, vector< vector<CpxNumTns> >& C)
+int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int ac, CpxNumTns& X, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
-  //  fft
   /// Make a duplicate of class X to Class T
   CpxNumTns T(X);
   fftw_plan p = fftw_plan_dft_3d(N3, N2, N1, (fftw_complex*)T.data(), (fftw_complex*)T.data(), FFTW_FORWARD, FFTW_ESTIMATE);
@@ -978,36 +1024,34 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
 	{
 	  int s = 0;
 	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
-	  fdct3d_forward_center(L1,L2,L3,s, O, C);;
+	  fdct3d_forward_center(L1,L2,L3,s, O, C, cellStruct);
 	}
 
 	for(int s=1; s<L; s++) {
 	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
 	  int nd = nbdstz_coarse * pow2(s/2);
-	  fdct3d_forward_angles(L1,L2,L3,s, nd, O, C);
+	  fdct3d_forward_angles(L1,L2,L3,s, nd, O, C, cellStruct);
 	}
 
   } else {
 	{
 	  int s = 0;
 	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
-	  fdct3d_forward_center(L1,L2,L3,s, O, C);
+	  fdct3d_forward_center(L1,L2,L3,s, O, C, cellStruct);
 	}
 	for(int s=1; s<L-1; s++) {
 	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);
 	  double L2 = 4.0*N2/3.0 / pow2(L-1-s);
 	  double L3 = 4.0*N3/3.0 / pow2(L-1-s);
-
 	  int nd = nbdstz_coarse * pow2(s/2);
-
-	  fdct3d_forward_angles(L1,L2,L3,s, nd, O, C);
+	  fdct3d_forward_angles(L1,L2,L3,s, nd, O, C, cellStruct);
 	}
 	{
 	  int s = L-1;
 	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);
 	  double L2 = 4.0*N2/3.0 / pow2(L-1-s);
 	  double L3 = 4.0*N3/3.0 / pow2(L-1-s);
-	  fdct3d_forward_wavelet(L1,L2,L3,s, O, C);
+	  fdct3d_forward_wavelet(L1,L2,L3,s, O, C, cellStruct);
 	}
   }
   return 0;

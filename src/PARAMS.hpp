@@ -2,7 +2,7 @@
  * PARAMS.hpp
  *
  *  Created on: Sep 15, 2014
- *      Author: entropy
+ *      Author: Sohel Bhuiyan
  */
 
 #ifndef PARAMS_HPP_
@@ -31,10 +31,7 @@ public:
 	      std::vector<std::vector<std::vector<double > > > newModel;
 	      std::vector< std::vector<double> > fxs,fys,fzs;
 	      std::vector< std::vector<int> > nxs,nys,nzs;
-	      std::vector<int > cellStruct;
-
-	      // Vector of class NumTns with complex double type ***************************************************
-
+	      std::vector<std::vector<std::vector <int > > >cellStruct;
 
 	      void reset()
 	      {

@@ -5,9 +5,9 @@
  *      Author: entropy
  */
 /*  =================================================================================
- *  Name        : SeismicImaging.hpp
+ *  Name        : FistaCore.hpp
  *  Author      : Sohel Bhuiyan
- *  Version     : 0.1
+ *  Version     : 1.0
  *  Purpose     : Base code of this software package. Contains all the basic methods entailed to generate image.
  *  			: This is a generalised migration code which can include different migration methods. It can accept
  *  			: any number of new method declaration.
