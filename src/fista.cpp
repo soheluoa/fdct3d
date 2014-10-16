@@ -3,9 +3,9 @@
  *  Name        : Fista.cpp
  *  Author      : Sohel Bhuiyan
  *  Version     : 1.0
- *  Purpose     : Generate the migrated image of the velocity model using PSPI method
+ *  Purpose     : To reconstruct 3D/2D seismic data
  *  Date        : September 12, 2014
- *  Affiliation : University of Alberta, Physics department (SAIG)
+ *  Affiliation : University of Alberta, Physics department, (SAIG)
  *  Email       : mbhuiyan@ualberta.ca
  * ===================================================================================
  */
@@ -22,8 +22,6 @@ int optionsCreate(const char* optfile, map<string,string>& options)
   options.clear();
   ifstream fin(optfile);
   fin.open("/home/entropy/workspace/fdct3d/src/params.txt");
-  std::cout << optfile << std::endl;
-  std::cout <<fin.fail()  << std::endl;
   assert(fin.good());
 
   string name;
@@ -89,7 +87,7 @@ int main(int argc, char** argv)
 
    /** Executing FISTA optimisation code to reconstruct seismic data *********************/
    start = clock();
-   fsc.Execute(&fsp, &params, &fsc);
+   fsc.Reconstruct(&fsp, &params, &fsc);
    finish = clock();
 
    std::cout << "Time: " << (finish-start)/double(CLOCKS_PER_SEC) << " Seconds " <<std::endl;

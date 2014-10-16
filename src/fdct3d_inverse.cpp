@@ -751,6 +751,7 @@ int fdct3d_inverse_wavelet(double L1, double L2, double L3, int s, vector< vecto
   DblOffVec big3(S3);  fdct3d_lowpass(L3, big3);
   
   int N1 = O.m();  int N2 = O.n();  int N3 = O.p();
+
   CpxNumTns T(csc[0]);
   fftw_plan p = fftw_plan_dft_3d(N3,N2,N1, (fftw_complex*)T.data(), (fftw_complex*)T.data(), FFTW_FORWARD, FFTW_ESTIMATE);
   fftw_execute(p);

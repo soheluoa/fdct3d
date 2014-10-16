@@ -1,8 +1,13 @@
 /*
- * fistaParams.hpp
- *
- *  Created on: Sep 12, 2014
- *      Author: entropy
+ *  =================================================================================
+ *  Name        : fistaParams.hpp
+ *  Author      : Sohel Bhuiyan
+ *  Version     : 1.0
+ *  Purpose     : Declare the required params of the FISTA and file names.
+ *  Date        : September 12, 2014
+ *  Affiliation : University of Alberta, Physics department, (SAIG)
+ *  Email       : mbhuiyan@ualberta.ca
+ * ===================================================================================
  */
 
 #ifndef FISTAPARAMS_HPP_

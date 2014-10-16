@@ -35,7 +35,7 @@ class fistaCore{
 	 **/
 
 	public:
-			void Execute(fistaParams *fsp, PARAMS* params, fistaCore* fsc);
+			void Reconstruct(fistaParams *fsp, PARAMS* params, fistaCore* fsc);
 			void aprod(fistaParams* fsp, PARAMS* params, int operatorType);
 
 	/**
@@ -51,13 +51,13 @@ class fistaCore{
 
 			void project(std::vector<std::vector<std::vector<double > > >x, double tau);
 
-			int spLine(double f, std::vector<std::vector<std::vector<double > > >x, std::vector<std::vector<std::vector<double > > >dx, double gtd, double fMax, std::vector<std::vector<std::vector<double> > > data);
+			inline int dotProduct(int n1, int n2, int n3, std::vector<std::vector<int> > &sampleMat, CpxNumTns &data );
 
 			double norm(std::vector<std::vector<int > >&x, int normType);
 
-			void wthresh(int n1, int n2, int n3, vector<vector<vector<double> > > &data, double thresh, std::vector< std::vector<CpxNumTns> > &x);
+			void wthresh(double thresh, std::vector< std::vector<CpxNumTns> > &x, std::vector<std::vector<CpxNumTns > >&y, std::vector<std::vector<std::vector<int> > > &cellStruct);
 
-			inline void writeBinFile(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<std::vector<double> > > &data);
+			inline void writeBinFile(std::string fileName, int n1, int n2, int n3, CpxNumTns &data);
 
 };
 

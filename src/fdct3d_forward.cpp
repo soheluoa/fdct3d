@@ -888,9 +888,9 @@ int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O,
 
   csc[0] = T;
 
-  cellStruct[s][0].push_back(S1);
-  cellStruct[s][0].push_back(S2);
-  cellStruct[s][0].push_back(S3);
+  cellStruct[s][0].push_back(N1);
+  cellStruct[s][0].push_back(N2);
+  cellStruct[s][0].push_back(N3);
 
   return 0;
 }

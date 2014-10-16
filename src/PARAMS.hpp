@@ -1,8 +1,13 @@
 /*
- * PARAMS.hpp
- *
- *  Created on: Sep 15, 2014
- *      Author: Sohel Bhuiyan
+ *  =================================================================================
+ *  Name        : PARAMS.hpp
+ *  Author      : Sohel Bhuiyan
+ *  Version     : 1.0
+ *  Purpose     : Declare the data structure required for the FISTA and 3D curvelet transformation.
+ *  Date        : September 12, 2014
+ *  Affiliation : University of Alberta, Physics department, (SAIG)
+ *  Email       : mbhuiyan@ualberta.ca
+ * ===================================================================================
  */
 
 #ifndef PARAMS_HPP_
@@ -26,7 +31,7 @@ public:
 	      std::vector<std::vector<std::vector<double > > > tempDiffCurvCoeff;
 	      std::vector<std::vector<std::vector<double > > > inData;
 	      std::vector<std::vector<std::vector<double > > > obsData;
-	      std::vector<std::vector<std::vector<double > > > reconData;
+
 	      std::vector<std::vector<std::vector<double > > > tempData;
 	      std::vector<std::vector<std::vector<double > > > newModel;
 	      std::vector< std::vector<double> > fxs,fys,fzs;
@@ -45,7 +50,6 @@ public:
 	      		tempData.clear();
 	      		tempDiffCurvCoeff.clear();
 	      		cellStruct.clear();
-	      		reconData.clear();
 	      		fxs.clear();
 	      		fys.clear();
 	      		fzs.clear();

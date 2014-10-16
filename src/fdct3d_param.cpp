@@ -183,7 +183,7 @@ int fdct3d_param(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int ac
 		double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
 		int nd = nbdstz_coarse * pow2(s/2);
 
-		// Define angles for 6 different faces of a cube ***************************************88
+		// Define angles for 6 different faces of a cube ***************************************
 		fdct3d_param_angles(L1,L2,L3,s, nd, fxs,fys,fzs, nxs,nys,nzs);
 	 }
 	 {
