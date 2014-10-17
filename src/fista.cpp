@@ -48,13 +48,13 @@ int main(int argc, char** argv)
 
    /* Data initialisation */
    fsp.bpTol = 0.000001;
-   fsp.maxItr = 200;
+   fsp.maxItr = 50;
    fsp.stat = 0;
-   fsp.lambda = 1.05;
-   fsp.alpha = 2.02;
+   fsp.lambda = 0.5;
+   fsp.alpha = 100.20;
    fsp.inDataFileName = "/home/entropy/workspace/fista/src/data_gain.bin";
    fsp.sampleMatFileName = "/home/entropy/workspace/fista/src/sample_mat.bin";
-   fsp.outDataFileName = "reconData.bin";
+   fsp.outDataFileName = "/home/entropy/workspace/fdct3d/src/reconData.bin";
 
    /* Data initialisation for 3D FFT ****************************************************/
    params.Nw = pow(2,ceil(log10(fsp.n1)/log10(2)));

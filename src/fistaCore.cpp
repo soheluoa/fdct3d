@@ -29,7 +29,7 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 	/**** Read a binary file (Seismic data) ********************************************/
     chkDataFile = readBinFile(fsp->inDataFileName, fsp->n1, fsp->n2, fsp->n3, params->inData);
 
-    // If the binary file is read successfully *****************************************
+    // If the binary file is read successfully *****************************************/
 	if(chkDataFile == 1)
 	{
 		double tmpt, temp, normType, t=1;
@@ -68,7 +68,7 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 				for (int i=0; i<params->cellStruct[s1][s2][0]; i++)
 					for (int j=0; j<params->cellStruct[s1][s2][1]; j++)
 						for (int k=0; k<params->cellStruct[s1][s2][2]; k++)
-							tmpCoeff(i,j,k)*=0.0;
+							tmpCoeff(i,j,k) =cpx(0.0, 0.0);
 				curvCoeff[s1][s2] = tmpCoeff;
 				tempCurvCoeff[s1].push_back(tmpCoeff);
 				tmpCoeff.~NumTns();
@@ -119,7 +119,7 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 					for (int i=0; i<params->cellStruct[s1][s2][0]; i++)
 						for (int j=0; j<params->cellStruct[s1][s2][1]; j++)
 							for (int k=0; k<params->cellStruct[s1][s2][2]; k++)
-								tmpCoeff(i,j,k) = real(tmpCoeff1(i,j,k)) + (real(tmpCoeff2(i,j,k))/fsp->alpha);
+								tmpCoeff(i,j,k) = cpx(real(tmpCoeff1(i,j,k)) + (real(tmpCoeff2(i,j,k))/fsp->alpha), 0.0);
 					addCurvCoeff[s1].push_back(tmpCoeff);
 					tmpCoeff1.~NumTns();
 					tmpCoeff2.~NumTns();
@@ -148,14 +148,13 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 					for (int i=0; i<params->cellStruct[s1][s2][0]; i++)
 						for (int j=0; j<params->cellStruct[s1][s2][1]; j++)
 							for (int k=0; k<params->cellStruct[s1][s2][2]; k++)
-								tmpCoeff(i,j,k) = temp * (real(tmpCoeff1(i,j,k)) - real(tmpCoeff2(i,j,k)));
+								tmpCoeff(i,j,k) =  cpx(real(tmpCoeff1(i,j,k)) + temp * (real(tmpCoeff1(i,j,k)) - real(tmpCoeff2(i,j,k))), 0.0);
 					tempCurvCoeff[s1][s2] = tmpCoeff;
 					tmpCoeff1.~NumTns();
 					tmpCoeff2.~NumTns();
 					tmpCoeff.~NumTns();
 				}
 			}
-
 			iterTempCurvCoeff.clear();
 			std::cout << "Iteration completed" << " "<< itrNum <<std::endl;
 		}
@@ -175,8 +174,9 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 		addCurvCoeff.clear();         		// temp_Yk_mat
 		iterTempCurvCoeff.clear();    		// tempx
 		iterDiffTempCurvCoeff.clear();		// diff coeff
-		//system("reconCube.sh");
 
+		system("cd /home/entropy/workspace/fdct3d/src/");
+		system("./reconCube.sh");
 	}
 	else
 		std::cout << "Please check whether the path of binary files are correct or not. " <<std::endl;
@@ -189,7 +189,7 @@ inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, 
 	int fsize, chkFile = 0;
 	FILE *fp;
 	fp = fopen(fileName.c_str(), "rb");
-	double *temp;
+	double *temp, maxVal;
 
     if(!fp)
     	std::cout << "File could not opened. " <<std::endl;
@@ -199,6 +199,7 @@ inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, 
     	fsize = n1 * n2 * n3;
     	temp = (double *) malloc(sizeof(double) * fsize);
     	fread(temp,sizeof(double), fsize, fp);
+    	double max = *std::max_element(temp,temp+fsize);
 
         // Very important: vector data stores the 3D seismic traces as follows:
     	// k-->Time samples, j-->(n2) in pscube, i-->n3 in pscube
@@ -209,7 +210,7 @@ inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, 
 			{
 			   data[i].push_back(vector<double> ());
 			   for(int k=0; k<n1; k++)
-				   data[i][j].push_back(temp[i*n2*n1+j*n1+k]);
+				   data[i][j].push_back(temp[i*n2*n1+j*n1+k]*max);
 			}
 		 }
     }
@@ -355,7 +356,7 @@ inline void fistaCore::wthresh(double thresh, std::vector<std::vector<CpxNumTns 
 						 temp = (fabs(real(tmpCoeff(i,j,k)))-thresh);
 						 temp = (temp+abs(temp))/2;
 						 sgn_data = ((real(tmpCoeff(i,j,k)) > 0) ? 1 : (real(tmpCoeff(i,j,k)) < 0) ? -1 : 0);
-						 tmpCoeff(i,j,k) = sgn_data * temp;
+						 tmpCoeff(i,j,k) = cpx(sgn_data * temp, 0.0);
 					}
 			y[s1][s2] = tmpCoeff;
 			tmpCoeff.~NumTns();
