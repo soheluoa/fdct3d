@@ -48,21 +48,17 @@ int main(int argc, char** argv)
 
    /* Data initialisation */
    fsp.bpTol = 0.000001;
-   fsp.maxItr = 50;
+   fsp.maxItr = 10;
+   fsp.eigenItr = 10;
    fsp.stat = 0;
-   fsp.lambda = 0.5;
-   fsp.alpha = 100.20;
-   fsp.inDataFileName = "/home/entropy/workspace/fista/src/data_gain.bin";
-   fsp.sampleMatFileName = "/home/entropy/workspace/fista/src/sample_mat.bin";
-   fsp.outDataFileName = "/home/entropy/workspace/fdct3d/src/reconData.bin";
+   fsp.lambda = 0.0;
+   fsp.inDataFileName = "/home/entropy/workspace/fdct3d/src/Data/data_gain.bin";
+   fsp.sampleMatFileName = "/home/entropy/workspace/fdct3d/src/Data/sample_mat.bin";
+   fsp.outDataFileName = "/home/entropy/workspace/fdct3d/src/Data/reconData.bin";
+   fsp.testDataFileName = "/home/entropy/workspace/fdct3d/src/Data/testData.bin";
 
    /* Data initialisation for 3D FFT ****************************************************/
-   params.Nw = pow(2,ceil(log10(fsp.n1)/log10(2)));
-   params.Kx = pow(2,ceil(log10(fsp.n2)/log10(2)));
-   params.Ky = pow(2,ceil(log10(fsp.n3)/log10(2)));
    params.ac = 0;
-
-   fsp.thresh = fsp.lambda/(2*fsp.alpha);
 
    assert(argc==3);
    map<string, string> opts;
@@ -85,7 +81,25 @@ int main(int argc, char** argv)
    mi = opts.find("-nbdstz_coarse"); assert(mi!=opts.end());
    {istringstream ss((*mi).second); ss>>params.nbdstz_coarse;}
 
-   /** Executing FISTA optimisation code to reconstruct seismic data *********************/
+   CpxNumTns init(fsp.n3,fsp.n2,fsp.n1);
+
+   for(int i=0; i<fsp.n3; i++)
+ 	  for(int j=0; j<fsp.n2; j++)
+ 		  for(int k=0; k<fsp.n1; k++)
+ 			  init(i,j,k) = cpx(1.0, 0.0);
+
+   // Initialise the parameters for 3D curvelet transformation ***************************
+   fdct3d_param(fsp.n3,fsp.n2,fsp.n1,params.nbscales,params.nbdstz_coarse,params.ac,params.fxs,params.fys,params.fzs, params.nxs,params.nys,params.nzs);
+
+   fsc.readSampleMat(fsp.sampleMatFileName, fsp.n1, fsp.n2, fsp.n3, params.samplMat);
+
+   fsp.alpha = 1; //*fsc.powerEigen(init, &fsp,  &params);
+
+   fsp.thresh = fsp.lambda/(2*fsp.alpha);
+
+   params.cellStruct.clear();
+
+   //* Executing FISTA optimisation code to reconstruct seismic data *********************/
    start = clock();
    fsc.Reconstruct(&fsp, &params, &fsc);
    finish = clock();
@@ -98,3 +112,4 @@ int main(int argc, char** argv)
    params.reset();
    return 0;
 }
+

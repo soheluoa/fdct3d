@@ -43,13 +43,7 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 		std::vector< std::vector<CpxNumTns> > iterTempCurvCoeff;    // tempx
 		std::vector< std::vector<CpxNumTns> > iterDiffTempCurvCoeff;// diff coeff
 
-		computeObsData(fsp->sampleMatFileName, fsp->n1, fsp->n2, fsp->n3, params->inData, params->samplMat, params->obsData);
-
-        // Save seismic data as complex number *****************************************
-		for(int i=0; i<fsp->n3; i++)
-		   for(int j=0; j<fsp->n2; j++)
-			   for(int k=0; k<fsp->n1; k++)
-				   obsData(i,j,k) =  cpx(params->obsData[i][j][k],0);
+		computeObsData(fsp->sampleMatFileName, fsp->n1, fsp->n2, fsp->n3, params->inData, params->samplMat, obsData);
 
 		// Initialise the parameters for 3D curvelet transformation ********************
 		fdct3d_param(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse,params->ac,params->fxs,params->fys,params->fzs, params->nxs,params->nys,params->nzs);
@@ -166,7 +160,7 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 		writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, reconData);
 
 		obsData.~NumTns();					// y
-		tmpData.~NumTns();                   // Hx
+		tmpData.~NumTns();                  // Hx
 		diffData.~NumTns();                 // y-Hx
 		reconData.~NumTns();                // recon data
 		curvCoeff.clear();            		// x
@@ -183,13 +177,13 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 }
 
 /*  3D complex float dynamic memory allocation with the size of ( n1 X n2 x n3 ) ***************/
-inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, vector<vector<vector<double > > > &data)
+inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, vector<vector<vector<float > > > &data)
 {
 
 	int fsize, chkFile = 0;
 	FILE *fp;
 	fp = fopen(fileName.c_str(), "rb");
-	double *temp, maxVal;
+	float *temp, maxVal, max;
 
     if(!fp)
     	std::cout << "File could not opened. " <<std::endl;
@@ -197,18 +191,19 @@ inline int fistaCore::readBinFile(std::string fileName, int n1, int n2, int n3, 
     {
     	chkFile = 1;
     	fsize = n1 * n2 * n3;
-    	temp = (double *) malloc(sizeof(double) * fsize);
-    	fread(temp,sizeof(double), fsize, fp);
-    	double max = *std::max_element(temp,temp+fsize);
+    	temp = (float *) malloc(sizeof(float) * fsize);
+    	fread(temp,sizeof(float), fsize, fp);
+    	maxVal = *std::max_element(temp,temp+fsize);
+        max = 1/maxVal;
 
         // Very important: vector data stores the 3D seismic traces as follows:
     	// k-->Time samples, j-->(n2) in pscube, i-->n3 in pscube
 		for(int i=0; i<n3; i++)
 		{
-			data.push_back(vector<vector<double> > ());
+			data.push_back(vector<vector<float> > ());
 			for(int j=0; j<n2; j++)
 			{
-			   data[i].push_back(vector<double> ());
+			   data[i].push_back(vector<float> ());
 			   for(int k=0; k<n1; k++)
 				   data[i][j].push_back(temp[i*n2*n1+j*n1+k]*max);
 			}
@@ -242,104 +237,104 @@ inline int fistaCore::dotProduct(int n1, int n2, int n3, std::vector<std::vector
 
 
 /*  3D complex float observed data (Orig_data .* sampling ) with the size of ( n1 X n2 x n3 ) ***************/
-inline int fistaCore::computeObsData(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<std::vector<double> > > &data, std::vector<std::vector<int> > &sampleMat, std::vector<std::vector<std::vector<double> > > &obsData )
+inline void fistaCore::computeObsData(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<std::vector<float> > > &data, std::vector<std::vector<int> > &sampleMat, CpxNumTns &obsData )
+{
+    	for(int i=0; i<n3; i++)
+		{
+			for(int j=0; j<n2; j++)
+			{
+			   for(int k=0; k<n1; k++)
+				   obsData(i,j,k) = cpx(data[i][j][k], 0.0);
+			}
+		}
+
+    	for(int i=0; i<n3; i++)
+		{
+		   for(int j=0; j<n2; j++)
+		   {
+		   	   if(sampleMat[i][j] == 0)
+		   	   {
+		   		   for( int k=0; k<n1; k++)
+		   			   obsData(i,j,k) = cpx(0.0,0.0);
+		   	   }
+		   }
+		}
+}
+
+/* Traversing the sampling matrix ***************************************/
+void fistaCore::readSampleMat(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<int> > &sampleMat)
 {
 	int chkDone = 0, fsize, *temp;
 	FILE *fp;
 	fp = fopen(fileName.c_str(), "rb");
 
-    if(!fp)
-    	std::cout << "File could not opened. " <<std::endl;
-    else
-    {
-    	chkDone = 1;
-    	fsize = n2 * n3;
-    	temp = (int *) malloc(sizeof(int) * fsize);
-    	fread(temp,sizeof(int), fsize, fp);
+	if(!fp)
+		std::cout << "File could not opened. " <<std::endl;
+	else
+	{
+		chkDone = 1;
+		fsize = n2 * n3;
+		temp = (int *) malloc(sizeof(int) * fsize);
+		fread(temp,sizeof(int), fsize, fp);
 
-    	for(int i=0; i<n3; i++)
+		for(int i=0; i<n3; i++)
 		{
-			obsData.push_back(vector<vector<double> > ());
-			for(int j=0; j<n2; j++)
-			{
-			   obsData[i].push_back(vector<double> ());
-			   for(int k=0; k<n1; k++)
-				   obsData[i][j].push_back(data[i][j][k]);
-			}
-		}
-
-    	for(int i=0; i<n3; i++)
-		{
-           sampleMat.push_back(vector<int> ());
+		   sampleMat.push_back(vector<int> ());
 		   for(int j=0; j<n2; j++)
 		   {
 			   sampleMat[i].push_back(temp[i*n2+j]);
-		   	   if(sampleMat[i][j] == 0)
-		   	   {
-		   		   for( int k=0; k<n1; k++)
-		   			   obsData[i][j][k] = 0.0;
-		   	   }
 		   }
 		}
-    }
-	return chkDone;
+	}
 }
 
 /* Compute different types of norms  *****************************************************/
-inline double fistaCore::norm(vector<vector<int> > &x, int normType)
+inline double fistaCore::norm( CpxNumTns &x, int normType)
 {
 	double normVal = 0.0;
-	int fsize, *temp;
+	int fsize;
 
+	/// Euclidean norm ******************
 	if(normType == 2)
 	{
-		for(unsigned int i=0; i<x.size(); i++)
-		{
-			for(unsigned int j=0; j<x[0].size(); j++)
-			{
-			   //for(unsigned int k=0; k<x[0][0].size(); k++)
-				   normVal += x[i][j]*x[i][j];
-			}
-		}
+		for(int i=0; i<x._p; i++)
+			for( int j=0; j<x._n; j++)
+				for(int k=0; k<x._m; k++)
+				   normVal += real(x(i,j,k))*real(x(i,j,k));
 		normVal = sqrt (normVal);
 	}
 
+	/// l-1 norm ************************
 	if(normType == 1)
 	{
-		for(unsigned int i=0; i<x.size(); i++)
-		{
-			for(unsigned int j=0; j<x[0].size(); j++)
-			{
-			   //for(unsigned int k=0; k<x[0][0].size(); k++)
-				   normVal += abs(x[i][j]);
-			}
-		}
+		for( int i=0; i<x._p; i++)
+			for(int j=0; j<x._n; j++)
+				for(int k=0; k<x._m; k++)
+				   normVal += fabs(real(x(i,j,k)));
 	}
 
-	// 'Inf' norm type /////
+	// 'Inf' norm type ******************
 	if(normType == 3)
 	{
-		fsize = x.size() * x[0].size();
-		temp = (int *) malloc(sizeof(int) * fsize);
+		float *temp;
+		fsize = x._m * x._n * x._p;
+		temp = (float *) malloc(sizeof(float) * fsize);
 
-		for(unsigned int i=0; i<x.size(); i++)
-		{
-			for(unsigned int j=0; j<x[0].size(); j++)
-			{
-			   //for(unsigned int k=0; k<x[0][0].size(); k++)
-				   temp[i*x[0].size()+j] = (x[i][j]);
-			}
-		}
+		for( int i=0; i<x._p; i++)
+			for(int j=0; j<x._n; j++)
+				for(int k=0; k<x._m; k++)
+					temp[k+j*x._m + i*x._n*x._p] = fabs(real(x(i,j,k)));
+
 		normVal = *std::max_element(temp, temp+fsize);
-		normVal = sqrt (normVal);
 	}
+
 	return normVal;
 }
 
 /******* Thresholding operator for the curvelet coefficients ************************************************/
 inline void fistaCore::wthresh(double thresh, std::vector<std::vector<CpxNumTns > >&x, std::vector<std::vector<CpxNumTns > >&y, std::vector<std::vector<std::vector<int> > > &cellStruct )
 {
-    double temp;
+    float temp;
     int sgn_data;
 
     // Traversing the curvelet coefficients and assign zero ************************
@@ -364,16 +359,62 @@ inline void fistaCore::wthresh(double thresh, std::vector<std::vector<CpxNumTns 
 	}
 }
 
+// *** To compute the maximum eigen of the operator *********************//
+double fistaCore::powerEigen(CpxNumTns &start, fistaParams* fsp,  PARAMS* params)
+{
+    double mu, tmp1, tmp2=0.0, normVal;
+	std::vector< std::vector<CpxNumTns> > Coeff;
+	CpxNumTns intermediate(fsp->n3, fsp->n2, fsp->n1);
+
+	// Initialise the parameters for 3D curvelet transformation *********
+	fdct3d_param(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse,params->ac,params->fxs,params->fys,params->fzs, params->nxs,params->nys,params->nzs);
+
+	for(int eigenItr=0; eigenItr<fsp->eigenItr; eigenItr++)
+	{
+		dotProduct(fsp->n1, fsp->n2, fsp->n3, params->samplMat, start);
+		fdct3d_forward(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse, params->ac, start, Coeff, params->cellStruct);
+
+		fdct3d_inverse(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse, params->ac, Coeff, intermediate);
+
+	    // start is the eigen vector corresponds to dominant eigen values  *****
+		normVal = norm(intermediate, 2);
+		for(int i=0; i<fsp->n3; i++)
+			for(int j=0; j<fsp->n2; j++)
+				for(int k=0; k<fsp->n1; k++)
+					start(i,j,k) = intermediate(i,j,k)/normVal;
+
+		intermediate.~NumTns();
+		Coeff.clear();
+		params->cellStruct.clear();
+		std::cout <<eigenItr<<std::endl;
+	}
+
+	fdct3d_forward(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse, params->ac, start, Coeff, params->cellStruct);
+
+	fdct3d_inverse(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse, params->ac, Coeff, intermediate);
+
+	tmp1 = norm(intermediate, 2) * norm(intermediate, 2);
+
+	for(int i=0; i<fsp->n3; i++)
+		for(int j=0; j<fsp->n2; j++)
+			for(int k=0; k<fsp->n1; k++)
+				tmp2 += real(start(i,j,k))*real(intermediate(i,j,k));
+
+	mu = tmp2/tmp1;
+
+   return mu;
+}
+
 /*  Write the binary file of the reconstructed seismic data with the size of ( n1 X n2 X n3 )***************/
 inline void fistaCore::writeBinFile(std::string fileName,int n1, int n2, int n3, CpxNumTns &data)
 {
 	int fsize;
 	FILE *fp;
 	fp = fopen(fileName.c_str(), "rb");
-	double *temp;
+	float *temp;
 
 	fsize = n1 * n2* n3;
-	temp = (double *) malloc(sizeof(double) * fsize);
+	temp = (float *) malloc(sizeof(float) * fsize);
 
 	for(int i=0; i<n3; i++)
 		for(int j=0; j<n2; j++)

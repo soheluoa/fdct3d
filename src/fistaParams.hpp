@@ -23,6 +23,7 @@ public:
 	// These parameters depend on the seismic data and velocity model
 	double bpTol;				    			/// Tolerance for basis pursuit solution
     int maxItr;									/// Maximum iterations number
+    int eigenItr;								/// Maximum iterations for power eigen
 	int nLineTot;	                  		    /// Total no. of linesearch steps.
 	double thresh; 								/// Threshold value
 	double lambda; 								/// Convergence constant
@@ -33,6 +34,7 @@ public:
     std::string inDataFileName;   					/// Absolute path of the In seismic data file
     std::string outDataFileName;   					/// Absolute path of the observed seismic data file
     std::string sampleMatFileName;   				/// Absolute path of the sample data file
+    std::string testDataFileName;   				/// Absolute path of the test case data file
 
 	/******** clear configuration variables **********/
 	void reset()
