@@ -31,13 +31,14 @@
 #include <queue>
 #include <utility>
 #include <algorithm>
+
 using namespace std;
 
 //FFT stuff
 #include "fftw3.h"
 
 //typedef double double;
-typedef complex<double> cpx;
+typedef complex<float> cpx;
 
 //AUX functions
 inline int pow2(int l) { assert(l>=0); return (1<<l); }

@@ -21,11 +21,13 @@ class PARAMS{
 
 public:
 	      int nbscales, nbdstz_coarse, ac;
+	      float qFactor;
 	      std::vector<std::vector<int > > samplMat;
+	      std::vector<double > misFit;
 	      std::vector<std::vector<std::vector<float > > > inData;
 	      std::vector<std::vector<std::vector<float > > > obsData;
 	      std::vector<std::vector<std::vector<float > > > tempData;
-	      std::vector< std::vector<double> > fxs,fys,fzs;
+	      std::vector< std::vector<float> > fxs,fys,fzs;
 	      std::vector< std::vector<int> > nxs,nys,nzs;
 	      std::vector<std::vector<std::vector <int > > >cellStruct;
 
@@ -42,6 +44,7 @@ public:
 	      		nxs.clear();
 	      		nys.clear();
 	      		nzs.clear();
+	      		misFit.clear();
 	      }
 };
 

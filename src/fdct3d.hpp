@@ -43,9 +43,8 @@ int fdct3d_inverse(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
 //OUTPUTS:
 //  x -- N1 by N2 by N3 tensor stored in CpxNumTns class
 
-
 int fdct3d_param(  int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int ac,
-						 vector< vector<double> >& fxs, vector< vector<double> >& fys, vector< vector<double> >& fzs,
+						 vector< vector<float> >& fxs, vector< vector<float> >& fys, vector< vector<float> >& fzs,
 						 vector< vector<int   > >& nxs, vector< vector<int   > >& nys, vector< vector<int   > >& nzs);
 //this function obtains auxiliary information about curvelet transform 
 //INPUTS:

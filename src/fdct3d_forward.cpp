@@ -13,7 +13,7 @@
 #include "fdct3dinline.hpp"
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
+int fdct3d_forward_angles(float L1, float L2, float L3, int s, int nd, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
   //allocate space
   vector<CpxNumTns>& csc = C[s];
@@ -25,38 +25,38 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   int wcnt = 0;
   int S1, S2, S3;
   int F1, F2, F3;
-  double R1, R2, R3;
+  float R1, R2, R3;
   fdct3d_rangecompute(L1, L2, L3, S1, S2, S3, F1, F2, F3, R1, R2, R3);
   DblOffVec big1(S1);  fdct3d_lowpass(L1, big1);
   DblOffVec big2(S2);  fdct3d_lowpass(L2, big2);
   DblOffVec big3(S3);  fdct3d_lowpass(L3, big3);
   
-  double Lh1 = L1/2;  double Lh2 = L2/2;  double Lh3 = L3/2;
-  int Sh1, Sh2, Sh3;   int Fh1, Fh2, Fh3;	 double Rh1, Rh2, Rh3;
+  float Lh1 = L1/2;  float Lh2 = L2/2;  float Lh3 = L3/2;
+  int Sh1, Sh2, Sh3;   int Fh1, Fh2, Fh3;	 float Rh1, Rh2, Rh3;
   fdct3d_rangecompute(Lh1, Lh2, Lh3, Sh1, Sh2, Sh3, Fh1, Fh2, Fh3, Rh1, Rh2, Rh3);
   DblOffVec sma1(S1);  fdct3d_lowpass(Lh1, sma1);
   DblOffVec sma2(S2);  fdct3d_lowpass(Lh2, sma2);
   DblOffVec sma3(S3);  fdct3d_lowpass(Lh3, sma3);
   
-  double W1 = L1/nd;  double W2 = L2/nd;  double W3 = L3/nd;
+  float W1 = L1/nd;  float W2 = L2/nd;  float W3 = L3/nd;
   
   typedef pair<int,int> intpair;
   typedef pair<int, intpair> inttriple;
-  map<inttriple, fftw_plan> planmap;
+  map<inttriple, fftwf_plan> planmap;
 
   //face 0: x,y,z
   for(int h=0; h<nd; h++) { //(y first z second)
 	 for(int g=0; g<nd; g++) {
-	   double xs = R1/4-(W1/2)/4;
-	   double xe = R1;
-	   double ys = -R2 + (2*g-1)*W2/2;
-	   double ye = -R2 + (2*g+3)*W2/2;
-	   double zs = -R3 + (2*h-1)*W3/2;
-	   double ze = -R3 + (2*h+3)*W3/2;
+	   float xs = R1/4-(W1/2)/4;
+	   float xe = R1;
+	   float ys = -R2 + (2*g-1)*W2/2;
+	   float ye = -R2 + (2*g+3)*W2/2;
+	   float zs = -R3 + (2*h-1)*W3/2;
+	   float ze = -R3 + (2*h+3)*W3/2;
 	   int xn = int(ceil(xe-xs));
 	   int yn = int(ceil(ye-ys));
 	   int zn = int(ceil(ze-zs));
-	   double thts, thtm, thte; //y to x
+	   float thts, thtm, thte; //y to x
 
 	   if(g==0) {
 		 thts = atan2(-1.0, 1.0-1.0/nd);
@@ -71,7 +71,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		 thtm = atan2(-1.0+(2.0*g+1.0)/nd, 1.0);
 		 thte = atan2(-1.0+(2.0*g+3.0)/nd, 1.0);
 	   }
-	   double phis, phim, phie; //z to x
+	   float phis, phim, phie; //z to x
 
 	   if(h==0) {
 		 phis = atan2(-1.0, 1.0-1.0/nd);
@@ -88,7 +88,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	   }
 
 	   int xh = xn/2;		  int yh = yn/2;		  int zh = zn/2; //half
-	   double R21 = R2/R1;		  double R31 = R3/R1;
+	   float R21 = R2/R1;		  float R31 = R3/R1;
 	   CpxOffTns wpdata(xn,yn,zn);
 
 	   for(int xcur=(int)ceil(xs); xcur<xe; xcur++)
@@ -116,25 +116,25 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				 tmpz+=zn;
 			 if(tmpz>=-zh+zn)
 				 tmpz-=zn;
-			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
-			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
+			 float ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
+			 float bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
+			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrtf(1.0-ss*ss);
 
-			 double thtcur = atan2(ycur/R2, xcur/R1);
-			 double phicur = atan2(zcur/R3, xcur/R1);
+			 float thtcur = atan2(ycur/R2, xcur/R1);
+			 float phicur = atan2(zcur/R3, xcur/R1);
 
-			 double glbpou;
+			 float glbpou;
 			 fdct3d_globalpou(thtcur, phicur, M_PI/4-atan2(1.0-1.0/nd, 1.0), glbpou);
 
-			 double wtht;
+			 float wtht;
 			 if(thtcur<thtm)
 			 {
 			   if(g==0)
 				   wtht = 1;
 			   else
 			   {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thts)/(thtm-thts), l, r);
 				   wtht = l;
 			   }
@@ -145,18 +145,18 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   	wtht = 1;
 			   else
 			   {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thtm)/(thte-thtm), l, r);
 				   wtht = r;
 			   }
 			 }
 
-			 double wphi;
+			 float wphi;
 			 if(phicur<phim) {
 			   if(h==0)						wphi = 1;
 			   else
 			   {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phis)/(phim-phis), l, r);
 				   wphi = l;
 			   }
@@ -165,13 +165,13 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 				   wphi = 1;
 			   else
 			   {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phim)/(phie-phim), l, r);
 				   wphi = r;
 			   }
 			 }
 
-			 double pou = glbpou * wtht * wphi;
+			 float pou = glbpou * wtht * wphi;
 			 wpdata(tmpx, tmpy, tmpz) *= pou;
 		   }
 	   } //xcur
@@ -180,17 +180,17 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 
-	   fftw_plan p = NULL;
-	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	   fftw_execute(p);		  		//cerr<<"wedge s"<<endl;
+	   fftwf_plan p = NULL;
+	   p = fftwf_plan_dft_3d(zn, yn, xn, (fftwf_complex*)tpdata.data(), (fftwf_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	   fftwf_execute(p);		  		//cerr<<"wedge s"<<endl;
 
-	   double sqrtprod = sqrt(double(xn*yn*zn));
+	   float sqrtprod = sqrt(float(xn*yn*zn));
 	   for(int i=0; i<xn; i++)
 		   for(int j=0; j<yn; j++)
 			   for(int k=0; k<zn; k++)
 				   tpdata(i,j,k) /= sqrtprod;
 
-	   fftw_destroy_plan(p);
+	   fftwf_destroy_plan(p);
 	   cellStruct[s].push_back(vector<int> ());
 	   cellStruct[s][wcnt].push_back(xn);
 	   cellStruct[s][wcnt].push_back(yn);
@@ -205,12 +205,12 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   for(int f=0; f<nd; f++) {
 	 for(int h=0; h<nd; h++) {
 	   
-	   double ys = R2/4-(W2/2)/4;		      double ye = R2;
-	   double zs = -R3 + (2*h-1)*W3/2;		  double ze = -R3 + (2*h+3)*W3/2;
-	   double xs = -R1 + (2*f-1)*W1/2;		  double xe = -R1 + (2*f+3)*W1/2;
+	   float ys = R2/4-(W2/2)/4;		      float ye = R2;
+	   float zs = -R3 + (2*h-1)*W3/2;		  float ze = -R3 + (2*h+3)*W3/2;
+	   float xs = -R1 + (2*f-1)*W1/2;		  float xe = -R1 + (2*f+3)*W1/2;
 	   int xn = int(ceil(xe-xs));		      int yn = int(ceil(ye-ys));
 	   int zn = int(ceil(ze-zs));
-	   double thts, thtm, thte; //z to y
+	   float thts, thtm, thte; //z to y
 
 	   if(h==0) {
 		 thts = atan2(-1.0, 1.0-1.0/nd);
@@ -229,7 +229,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		 thtm = atan2(-1.0+(2.0*h+1.0)/nd, 1.0);
 		 thte = atan2(-1.0+(2.0*h+3.0)/nd, 1.0);
 	   }
-	   double phis, phim, phie; //z to x
+	   float phis, phim, phie; //z to x
 
 	   if(f==0) {
 		 phis = atan2(-1.0, 1.0-1.0/nd);
@@ -249,8 +249,8 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 	   int xh = xn/2;
 	   int yh = yn/2;
 	   int zh = zn/2;
-	   double R32 = R3/R2;
-	   double R12 = R1/R2;
+	   float R32 = R3/R2;
+	   float R12 = R1/R2;
 
 	   CpxOffTns wpdata(xn,yn,zn);
 
@@ -268,22 +268,22 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 int tmpy = ycur%yn;				  if(tmpy<-yh) tmpy+=yn;				  if(tmpy>=-yh+yn) tmpy-=yn;
 			 int tmpz = zcur%zn;				  if(tmpz<-zh) tmpz+=zn;				  if(tmpz>=-zh+zn) tmpz-=zn;
 
-			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
-			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
+			 float ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
+			 float bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
-			 double thtcur = atan2(zcur/R3, ycur/R2);
-			 double phicur = atan2(xcur/R1, ycur/R2);
-			 double glbpou;
+			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrtf(1.0-ss*ss);
+			 float thtcur = atan2(zcur/R3, ycur/R2);
+			 float phicur = atan2(xcur/R1, ycur/R2);
+			 float glbpou;
 			 fdct3d_globalpou(thtcur, phicur, M_PI/4-atan2(1.0-1.0/nd, 1.0), glbpou); //CHECK
-			 double wtht;
+			 float wtht;
 
 			 if(thtcur<thtm) {
 			   if(h==0)
 				   wtht = 1;
 			   else
 			   {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thts)/(thtm-thts), l, r);
 				   wtht = l;
 			   }
@@ -292,16 +292,16 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			   if(h==nd-1)
 				   wtht = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thtm)/(thte-thtm), l, r);
 				   wtht = r;
 			   }
 			 }
-			 double wphi;
+			 float wphi;
 			 if(phicur<phim) {
 			   if(f==0)						wphi = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phis)/(phim-phis), l, r);
 				   wphi = l;
 			   }
@@ -309,12 +309,12 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			   if(f==nd-1)
 				   wphi = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phim)/(phie-phim), l, r);
 				   wphi = r;
 			   }
 			 }
-			 double pou = glbpou * wtht * wphi;
+			 float pou = glbpou * wtht * wphi;
 			 wpdata(tmpx, tmpy, tmpz) *= pou;
 		   }
 	   } //ycur
@@ -322,17 +322,17 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 
-	   fftw_plan p = NULL;
-	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	   fftw_execute(p);		  //cerr<<"wedge s"<<endl;
+	   fftwf_plan p = NULL;
+	   p = fftwf_plan_dft_3d(zn, yn, xn, (fftwf_complex*)tpdata.data(), (fftwf_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	   fftwf_execute(p);		  //cerr<<"wedge s"<<endl;
 
-	   double sqrtprod = sqrt(double(xn*yn*zn));
+	   float sqrtprod = sqrt(float(xn*yn*zn));
 	   for(int i=0; i<xn; i++)
 		   for(int j=0; j<yn; j++)
 			   for(int k=0; k<zn; k++)
 				   tpdata(i,j,k) /= sqrtprod;
 
-	   fftw_destroy_plan(p);
+	   fftwf_destroy_plan(p);
 
 	   cellStruct[s].push_back(vector<int> ());
 	   cellStruct[s][wcnt].push_back(xn);
@@ -348,11 +348,11 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   for(int g=0; g<nd; g++) {
 	 for(int f=0; f<nd; f++)
 	 {
-	   double zs = R3/4-(W3/2)/4;		double ze = R3;
-	   double xs = -R1 + (2*f-1)*W1/2;		double xe = -R1 + (2*f+3)*W1/2;
-	   double ys = -R2 + (2*g-1)*W2/2;		double ye = -R2 + (2*g+3)*W2/2;
+	   float zs = R3/4-(W3/2)/4;		float ze = R3;
+	   float xs = -R1 + (2*f-1)*W1/2;		float xe = -R1 + (2*f+3)*W1/2;
+	   float ys = -R2 + (2*g-1)*W2/2;		float ye = -R2 + (2*g+3)*W2/2;
 	   int xn = int(ceil(xe-xs));		  int yn = int(ceil(ye-ys));		  int zn = int(ceil(ze-zs));
-	   double thts, thtm, thte; //y to x
+	   float thts, thtm, thte; //y to x
 	   if(f==0) {
 		 thts = atan2(-1.0, 1.0-1.0/nd);
 		 thtm = atan2(-1.0+1.0/nd, 1.0);
@@ -366,7 +366,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		 thtm = atan2(-1.0+(2.0*f+1.0)/nd, 1.0);
 		 thte = atan2(-1.0+(2.0*f+3.0)/nd, 1.0);
 	   }
-	   double phis, phim, phie; //z to x
+	   float phis, phim, phie; //z to x
 	   if(g==0) {
 		 phis = atan2(-1.0, 1.0-1.0/nd);
 		 phim = atan2(-1.0+1.0/nd, 1.0);
@@ -381,7 +381,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		 phie = atan2(-1.0+(2.0*g+3.0)/nd, 1.0);
 	   }
 	   int xh = xn/2;		  int yh = yn/2;		  int zh = zn/2;
-	   double R13 = R1/R3;		  double R23 = R2/R3;//double R13 = double(F1)/double(F3);		  double R23 = double(F2)/double(F3);
+	   float R13 = R1/R3;		  float R23 = R2/R3;//float R13 = float(F1)/float(F3);		  float R23 = float(F2)/float(F3);
 	   CpxOffTns wpdata(xn,yn,zn);
 	   for(int zcur=(int)ceil(zs); zcur<ze; zcur++) {
 		 int xfm = (int)ceil( max(-R1, R13*zcur*tan(thts)) );
@@ -395,22 +395,22 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 int tmpx = xcur%xn;				  if(tmpx<-xh) tmpx+=xn;				  if(tmpx>=-xh+xn) tmpx-=xn;
 			 int tmpy = ycur%yn;				  if(tmpy<-yh) tmpy+=yn;				  if(tmpy>=-yh+yn) tmpy-=yn;
 			 int tmpz = zcur%zn;				  if(tmpz<-zh) tmpz+=zn;				  if(tmpz>=-zh+zn) tmpz-=zn;
-			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
-			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
+			 float ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
+			 float bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
+			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrtf(1.0-ss*ss);
 
-			 double thtcur = atan2(xcur/R1, zcur/R3);
-			 double phicur = atan2(ycur/R2, zcur/R3);
+			 float thtcur = atan2(xcur/R1, zcur/R3);
+			 float phicur = atan2(ycur/R2, zcur/R3);
 
-			 double glbpou;
+			 float glbpou;
 			 fdct3d_globalpou(thtcur, phicur, M_PI/4-atan2(1.0-1.0/nd, 1.0), glbpou);
 
-			 double wtht;
+			 float wtht;
 			 if(thtcur<thtm) {
 			   if(f==0)						wtht = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thts)/(thtm-thts), l, r);
 				   wtht = l;
 			   }
@@ -418,16 +418,16 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			   if(f==nd-1)
 				   wtht = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thtm)/(thte-thtm), l, r);
 				   wtht = r;
 			   }
 			 }
-			 double wphi;
+			 float wphi;
 			 if(phicur<phim) {
 			   if(g==0)						wphi = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phis)/(phim-phis), l, r);
 				   wphi = l;
 			   }
@@ -435,29 +435,29 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			   if(g==nd-1)
 				   wphi = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phim)/(phie-phim), l, r);
 				   wphi = r;
 			   }
 			 }
-			 double pou = glbpou * wtht * wphi;
+			 float pou = glbpou * wtht * wphi;
 			 wpdata(tmpx, tmpy, tmpz) *= pou;
 		   }
 	   }//zcur
 	   CpxNumTns tpdata(xn,yn,zn);
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
 
-	   fftw_plan p = NULL;
-	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	   fftw_execute(p);		  //cerr<<"wedge s"<<endl;
+	   fftwf_plan p = NULL;
+	   p = fftwf_plan_dft_3d(zn, yn, xn, (fftwf_complex*)tpdata.data(), (fftwf_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	   fftwf_execute(p);		  //cerr<<"wedge s"<<endl;
 
-	   double sqrtprod = sqrt(double(xn*yn*zn));
+	   float sqrtprod = sqrt(float(xn*yn*zn));
 	   for(int i=0; i<xn; i++)
 		   for(int j=0; j<yn; j++)
 			   for(int k=0; k<zn; k++)
 				   tpdata(i,j,k) /= sqrtprod;
 
-	   fftw_destroy_plan(p);
+	   fftwf_destroy_plan(p);
 
 	   cellStruct[s].push_back(vector<int> ());
 	   cellStruct[s][wcnt].push_back(xn);
@@ -475,13 +475,13 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   for(int h=nd-1; h>=0; h--) {
 	 for(int g=nd-1; g>=0; g--) {
 	   
-	   double xs = -R1;		  double xe = -R1/4+(W1/2)/4;
-	   double ys = -R2 + (2*g-1)*W2/2;		double ye = -R2 + (2*g+3)*W2/2;
-	   double zs = -R3 + (2*h-1)*W3/2;		double ze = -R3 + (2*h+3)*W3/2;
+	   float xs = -R1;		  float xe = -R1/4+(W1/2)/4;
+	   float ys = -R2 + (2*g-1)*W2/2;		float ye = -R2 + (2*g+3)*W2/2;
+	   float zs = -R3 + (2*h-1)*W3/2;		float ze = -R3 + (2*h+3)*W3/2;
 
 	   int xn = int(ceil(xe-xs));		  int yn = int(ceil(ye-ys));		  int zn = int(ceil(ze-zs));
 
-	   double thts, thtm, thte; //y to x
+	   float thts, thtm, thte; //y to x
 	   if(g==0) {
 		 thts = atan2(-1.0, 1.0-1.0/nd);
 		 thtm = atan2(-1.0+1.0/nd, 1.0);
@@ -496,7 +496,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		 thtm = atan2(-1.0+(2.0*g+1.0)/nd, 1.0);
 		 thte = atan2(-1.0+(2.0*g+3.0)/nd, 1.0);
 	   }
-	   double phis, phim, phie; //z to x
+	   float phis, phim, phie; //z to x
 	   if(h==0) {
 		 phis = atan2(-1.0, 1.0-1.0/nd);
 		 phim = atan2(-1.0+1.0/nd, 1.0);
@@ -514,7 +514,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		 phie = atan2(-1.0+(2.0*h+3.0)/nd, 1.0);
 	   }
 	   int xh = xn/2;		  int yh = yn/2;		  int zh = zn/2;
-	   double R21 = R2/R1;		  double R31 = R3/R1;
+	   float R21 = R2/R1;		  float R31 = R3/R1;
 	   CpxOffTns wpdata(xn,yn,zn);
 
 	   for(int xcur=(int)ceil(xs); xcur<xe; xcur++) {
@@ -528,66 +528,66 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			 int tmpx = xcur%xn;				  if(tmpx<-xh) tmpx+=xn;				  if(tmpx>=-xh+xn) tmpx-=xn;
 			 int tmpy = ycur%yn;				  if(tmpy<-yh) tmpy+=yn;				  if(tmpy>=-yh+yn) tmpy-=yn;
 			 int tmpz = zcur%zn;				  if(tmpz<-zh) tmpz+=zn;				  if(tmpz>=-zh+zn) tmpz-=zn;
-			 double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
-			 double bb = big1(xcur)*big2(ycur)*big3(zcur);
+			 float ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
+			 float bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
-			 double thtcur = atan2(ycur/R2, (-xcur)/R1);
-			 double phicur = atan2(zcur/R3, (-xcur)/R1);
+			 wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrtf(1.0-ss*ss);
+			 float thtcur = atan2(ycur/R2, (-xcur)/R1);
+			 float phicur = atan2(zcur/R3, (-xcur)/R1);
 
-			 double glbpou;
+			 float glbpou;
 			 fdct3d_globalpou(thtcur, phicur, M_PI/4-atan2(1.0-1.0/nd, 1.0), glbpou);
-			 double wtht;
+			 float wtht;
 			 if(thtcur<thtm) {
 			   if(g==0)						wtht = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thts)/(thtm-thts), l, r);
 				   wtht = l;
 			   }
 			 } else {
 			   if(g==nd-1)						wtht = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (thtcur-thtm)/(thte-thtm), l, r);
 				   wtht = r;
 			   }
 			 }
-			 double wphi;
+			 float wphi;
 
 			 if(phicur<phim) {
 			   if(h==0)						wphi = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phis)/(phim-phis), l, r);
 				   wphi = l;
 			   }
 			 } else {
 			   if(h==nd-1)						wphi = 1;
 			   else {
-				   double l,r;
+				   float l,r;
 				   fdct3d_window( (phicur-phim)/(phie-phim), l, r);
 				   wphi = r;
 			   }
 			 }
-			 double pou = glbpou * wtht * wphi;
+			 float pou = glbpou * wtht * wphi;
 			 wpdata(tmpx, tmpy, tmpz) *= pou;
 		   }
 	   } //xcur
 
 	   CpxNumTns tpdata(xn,yn,zn);
 	   fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
-	   fftw_plan p = NULL;
-	   p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	   fftw_execute(p);		  //cerr<<"wedge s"<<endl;
+	   fftwf_plan p = NULL;
+	   p = fftwf_plan_dft_3d(zn, yn, xn, (fftwf_complex*)tpdata.data(), (fftwf_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	   fftwf_execute(p);		  //cerr<<"wedge s"<<endl;
 
-	   double sqrtprod = sqrt(double(xn*yn*zn));
+	   float sqrtprod = sqrt(float(xn*yn*zn));
 	   for(int i=0; i<xn; i++)
 		   for(int j=0; j<yn; j++)
 			   for(int k=0; k<zn; k++)
 				   tpdata(i,j,k) /= sqrtprod;
 
-	   fftw_destroy_plan(p);
+	   fftwf_destroy_plan(p);
 
 	   cellStruct[s].push_back(vector<int> ());
 	   cellStruct[s][wcnt].push_back(xn);
@@ -602,11 +602,11 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   for(int f=nd-1; f>=0; f--) {
 	for(int h=nd-1; h>=0; h--) {
 	  
-	  double ys = -R2;		  double ye = -R2/4+(W2/2)/4;
-	  double zs = -R3 + (2*h-1)*W3/2;		  double ze = -R3 + (2*h+3)*W3/2;
-	  double xs = -R1 + (2*f-1)*W1/2;		  double xe = -R1 + (2*f+3)*W1/2;
+	  float ys = -R2;		  float ye = -R2/4+(W2/2)/4;
+	  float zs = -R3 + (2*h-1)*W3/2;		  float ze = -R3 + (2*h+3)*W3/2;
+	  float xs = -R1 + (2*f-1)*W1/2;		  float xe = -R1 + (2*f+3)*W1/2;
 	  int xn = int(ceil(xe-xs));		  int yn = int(ceil(ye-ys));		  int zn = int(ceil(ze-zs));
-	  double thts, thtm, thte; //z to y
+	  float thts, thtm, thte; //z to y
 	  if(h==0) {
 		thts = atan2(-1.0, 1.0-1.0/nd);
 		thtm = atan2(-1.0+1.0/nd, 1.0);
@@ -620,7 +620,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		thtm = atan2(-1.0+(2.0*h+1.0)/nd, 1.0);
 		thte = atan2(-1.0+(2.0*h+3.0)/nd, 1.0);
 	  }
-	  double phis, phim, phie; //z to x
+	  float phis, phim, phie; //z to x
 	  if(f==0) {
 		phis = atan2(-1.0, 1.0-1.0/nd);
 		phim = atan2(-1.0+1.0/nd, 1.0);
@@ -635,7 +635,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		phie = atan2(-1.0+(2.0*f+3.0)/nd, 1.0);
 	  }
 	  int xh = xn/2;		  int yh = yn/2;		  int zh = zn/2;
-	  double R32 = R3/R2;		  double R12 = R1/R2;	  //double R32 = double(F3)/double(F2);		  double R12 = double(F1)/double(F2);
+	  float R32 = R3/R2;		  float R12 = R1/R2;	  //float R32 = float(F3)/float(F2);		  float R12 = float(F1)/float(F2);
 
 	  CpxOffTns wpdata(xn,yn,zn);
 
@@ -650,66 +650,66 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			int tmpy = ycur%yn;				  if(tmpy<-yh) tmpy+=yn;				  if(tmpy>=-yh+yn) tmpy-=yn;
 			int tmpz = zcur%zn;				  if(tmpz<-zh) tmpz+=zn;				  if(tmpz>=-zh+zn) tmpz-=zn;
 
-			double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
-			double bb = big1(xcur)*big2(ycur)*big3(zcur);
+			float ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
+			float bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
+			wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrtf(1.0-ss*ss);
 
-			double thtcur = atan2(zcur/R3, (-ycur)/R2);
-			double phicur = atan2(xcur/R1, (-ycur)/R2);
+			float thtcur = atan2(zcur/R3, (-ycur)/R2);
+			float phicur = atan2(xcur/R1, (-ycur)/R2);
 
-			double glbpou;
+			float glbpou;
 			fdct3d_globalpou(thtcur, phicur, M_PI/4-atan2(1.0-1.0/nd, 1.0), glbpou); //CHECK
-			double wtht;
+			float wtht;
 			if(thtcur<thtm) {
 			  if(h==0)						wtht = 1;
 			  else {
-				  	 double l,r;
+				  	 float l,r;
 				  	 fdct3d_window( (thtcur-thts)/(thtm-thts), l, r);
 				  	 wtht = l;
 			  }
 			} else {
 			  if(h==nd-1)						wtht = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (thtcur-thtm)/(thte-thtm), l, r);
 				  wtht = r;
 			  }
 			}
-			double wphi;
+			float wphi;
 			if(phicur<phim) {
 			  if(f==0)						wphi = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (phicur-phis)/(phim-phis), l, r);
 				  wphi = l;
 			  }
 			} else {
 			  if(f==nd-1)						wphi = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (phicur-phim)/(phie-phim), l, r);
 				  wphi = r;
 			  }
 			}
-			double pou = glbpou * wtht * wphi;
+			float pou = glbpou * wtht * wphi;
 			wpdata(tmpx, tmpy, tmpz) *= pou;
 		  }
 	  } //ycur
 	  CpxNumTns tpdata(xn,yn,zn);
 	  fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
-	  fftw_plan p = NULL;
+	  fftwf_plan p = NULL;
 
-	  p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	  fftw_execute(p);		  //cerr<<"wedge s"<<endl;
+	  p = fftwf_plan_dft_3d(zn, yn, xn, (fftwf_complex*)tpdata.data(), (fftwf_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	  fftwf_execute(p);		  //cerr<<"wedge s"<<endl;
 
-	  double sqrtprod = sqrt(double(xn*yn*zn));
+	  float sqrtprod = sqrt(float(xn*yn*zn));
 	  for(int i=0; i<xn; i++)
 		  for(int j=0; j<yn; j++)
 			  for(int k=0; k<zn; k++)
 				  tpdata(i,j,k) /= sqrtprod;
 
-	  fftw_destroy_plan(p);
+	  fftwf_destroy_plan(p);
 	  cellStruct[s].push_back(vector<int> ());
 	  cellStruct[s][wcnt].push_back(xn);
 	  cellStruct[s][wcnt].push_back(yn);
@@ -723,12 +723,12 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
   for(int g=nd-1; g>=0; g--) {
 	for(int f=nd-1; f>=0; f--) {
 	  
-	  double zs = -R3;		  double ze = -R3/4+(W3/2)/4;
-	  double xs = -R1 + (2*f-1)*W1/2;		double xe = -R1 + (2*f+3)*W1/2;
-	  double ys = -R2 + (2*g-1)*W2/2;		double ye = -R2 + (2*g+3)*W2/2;
+	  float zs = -R3;		  float ze = -R3/4+(W3/2)/4;
+	  float xs = -R1 + (2*f-1)*W1/2;		float xe = -R1 + (2*f+3)*W1/2;
+	  float ys = -R2 + (2*g-1)*W2/2;		float ye = -R2 + (2*g+3)*W2/2;
 
 	  int xn = int(ceil(xe-xs));		  int yn = int(ceil(ye-ys));		  int zn = int(ceil(ze-zs));
-	  double thts, thtm, thte; //y to x
+	  float thts, thtm, thte; //y to x
 	  if(f==0) {
 		thts = atan2(-1.0, 1.0-1.0/nd);
 		thtm = atan2(-1.0+1.0/nd, 1.0);
@@ -742,7 +742,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		thtm = atan2(-1.0+(2.0*f+1.0)/nd, 1.0);
 		thte = atan2(-1.0+(2.0*f+3.0)/nd, 1.0);
 	  }
-	  double phis, phim, phie; //z to x
+	  float phis, phim, phie; //z to x
 	  if(g==0) {
 		phis = atan2(-1.0, 1.0-1.0/nd);
 		phim = atan2(-1.0+1.0/nd, 1.0);
@@ -757,7 +757,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 		phie = atan2(-1.0+(2.0*g+3.0)/nd, 1.0);
 	  }
 	  int xh = xn/2;		  int yh = yn/2;		  int zh = zn/2;
-	  double R13 = R1/R3;		  double R23 = R2/R3;	  //double R13 = double(F1)/double(F3);		  double R23 = double(F2)/double(F3);
+	  float R13 = R1/R3;		  float R23 = R2/R3;	  //float R13 = float(F1)/float(F3);		  float R23 = float(F2)/float(F3);
 	  CpxOffTns wpdata(xn,yn,zn);
 	  for(int zcur=(int)ceil(zs); zcur<ze; zcur++) {
 		int xfm = (int)ceil( max(-R1, R13*(-zcur)*tan(thts)) );
@@ -770,64 +770,64 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 			int tmpx = xcur%xn;				  if(tmpx<-xh) tmpx+=xn;				  if(tmpx>=-xh+xn) tmpx-=xn;
 			int tmpy = ycur%yn;				  if(tmpy<-yh) tmpy+=yn;				  if(tmpy>=-yh+yn) tmpy-=yn;
 			int tmpz = zcur%zn;				  if(tmpz<-zh) tmpz+=zn;				  if(tmpz>=-zh+zn) tmpz-=zn;
-			double ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
-			double bb = big1(xcur)*big2(ycur)*big3(zcur);
+			float ss = sma1(xcur)*sma2(ycur)*sma3(zcur);
+			float bb = big1(xcur)*big2(ycur)*big3(zcur);
 
-			wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrt(1.0-ss*ss);
-			double thtcur = atan2(xcur/R1, (-zcur)/R3);
-			double phicur = atan2(ycur/R2, (-zcur)/R3);
-			double glbpou;
+			wpdata(tmpx, tmpy, tmpz) = O(xcur,ycur,zcur) * bb * sqrtf(1.0-ss*ss);
+			float thtcur = atan2(xcur/R1, (-zcur)/R3);
+			float phicur = atan2(ycur/R2, (-zcur)/R3);
+			float glbpou;
 			fdct3d_globalpou(thtcur, phicur, M_PI/4-atan2(1.0-1.0/nd, 1.0), glbpou);
-			double wtht;
+			float wtht;
 			if(thtcur<thtm) {
 			  if(f==0)						wtht = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (thtcur-thts)/(thtm-thts), l, r);
 				  wtht = l;
 			  }
 			} else {
 			  if(f==nd-1)						wtht = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (thtcur-thtm)/(thte-thtm), l, r);
 				  wtht = r;
 			  }
 			}
-			double wphi;
+			float wphi;
 			if(phicur<phim) {
 			  if(g==0)						wphi = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (phicur-phis)/(phim-phis), l, r);
 				  wphi = l;
 			  }
 			} else {
 			  if(g==nd-1)						wphi = 1;
 			  else {
-				  double l,r;
+				  float l,r;
 				  fdct3d_window( (phicur-phim)/(phie-phim), l, r);
 				  wphi = r;
 			  }
 			}
-			double pou = glbpou * wtht * wphi;
+			float pou = glbpou * wtht * wphi;
 			wpdata(tmpx, tmpy, tmpz) *= pou;
 		  }
 	  }//zcur
 
 	  CpxNumTns tpdata(xn,yn,zn);
 	  fdct3d_ifftshift(xn,yn,zn,wpdata,tpdata);
-	  fftw_plan p = NULL;
-	  p = fftw_plan_dft_3d(zn, yn, xn, (fftw_complex*)tpdata.data(), (fftw_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-	  fftw_execute(p);		  //cerr<<"wedge s"<<endl;
+	  fftwf_plan p = NULL;
+	  p = fftwf_plan_dft_3d(zn, yn, xn, (fftwf_complex*)tpdata.data(), (fftwf_complex*)tpdata.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+	  fftwf_execute(p);		  //cerr<<"wedge s"<<endl;
 
-	  double sqrtprod = sqrt(double(xn*yn*zn));
+	  float sqrtprod = sqrt(float(xn*yn*zn));
 	  for(int i=0; i<xn; i++)
 		  for(int j=0; j<yn; j++)
 			  for(int k=0; k<zn; k++)
 				  tpdata(i,j,k) /= sqrtprod;
 
-	  fftw_destroy_plan(p);
+	  fftwf_destroy_plan(p);
 
 	  cellStruct[s].push_back(vector<int> ());
 	  cellStruct[s][wcnt].push_back(xn);
@@ -844,7 +844,7 @@ int fdct3d_forward_angles(double L1, double L2, double L3, int s, int nd, CpxOff
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
+int fdct3d_forward_wavelet(float L1, float L2, float L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
   vector<CpxNumTns>& csc = C[s];
   cellStruct.push_back(vector<vector<int> > ());
@@ -854,7 +854,7 @@ int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O,
   L1 = L1/2;  L2 = L2/2;  L3 = L3/2;
   int S1, S2, S3;
   int F1, F2, F3;
-  double R1, R2, R3;
+  float R1, R2, R3;
   fdct3d_rangecompute(L1, L2, L3, S1, S2, S3, F1, F2, F3, R1, R2, R3);
 
   DblOffVec big1(S1);  fdct3d_lowpass(L1, big1);
@@ -865,7 +865,7 @@ int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O,
 	for(int j=-S2/2; j<-S2/2+S2; j++)
 	  for(int k=-S3/2; k<-S3/2+S3; k++)
 	  {
-		double pou = big1(i)*big2(j)*big3(k);
+		float pou = big1(i)*big2(j)*big3(k);
 		O(i,j,k) = O(i,j,k) * sqrt(1-pou*pou);
 	  }
   //cerr<<energy(O)<<endl;
@@ -875,11 +875,11 @@ int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O,
 
   fdct3d_ifftshift(N1,N2,N3,O,T);
 
-  fftw_plan p = fftw_plan_dft_3d(N3,N2,N1, (fftw_complex*)T.data(), (fftw_complex*)T.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-  fftw_execute(p);
-  fftw_destroy_plan(p);
+  fftwf_plan p = fftwf_plan_dft_3d(N3,N2,N1, (fftwf_complex*)T.data(), (fftwf_complex*)T.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+  fftwf_execute(p);
+  fftwf_destroy_plan(p);
 
-  double sqrtprod = sqrt(double(N1*N2*N3));
+  float sqrtprod = sqrt(float(N1*N2*N3));
   
   for(int i=0; i<N1; i++)
 	  for(int j=0; j<N2; j++)
@@ -896,7 +896,7 @@ int fdct3d_forward_wavelet(double L1, double L2, double L3, int s, CpxOffTns& O,
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
-int fdct3d_forward_center(double L1, double L2, double L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
+int fdct3d_forward_center(float L1, float L2, float L3, int s, CpxOffTns& O, vector< vector<CpxNumTns> >& C, std::vector<std::vector<std::vector<int> > > &cellStruct)
 {
   vector<CpxNumTns>& csc = C[s];
   cellStruct.push_back(vector<vector<int> > ());
@@ -906,7 +906,7 @@ int fdct3d_forward_center(double L1, double L2, double L3, int s, CpxOffTns& O, 
   
   int S1, S2, S3;
   int F1, F2, F3;
-  double R1, R2, R3;
+  float R1, R2, R3;
   fdct3d_rangecompute(L1, L2, L3, S1, S2, S3, F1, F2, F3, R1, R2, R3);
 
   DblOffVec big1(S1);  fdct3d_lowpass(L1, big1);
@@ -924,11 +924,11 @@ int fdct3d_forward_center(double L1, double L2, double L3, int s, CpxOffTns& O, 
   CpxNumTns T(S1,S2,S3);
   fdct3d_ifftshift(S1,S2,S3,A,T);
 
-  fftw_plan p = fftw_plan_dft_3d(S3,S2,S1, (fftw_complex*)T.data(), (fftw_complex*)T.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
-  fftw_execute(p);
-  fftw_destroy_plan(p);
+  fftwf_plan p = fftwf_plan_dft_3d(S3,S2,S1, (fftwf_complex*)T.data(), (fftwf_complex*)T.data(), FFTW_BACKWARD, FFTW_ESTIMATE);
+  fftwf_execute(p);
+  fftwf_destroy_plan(p);
 
-  double sqrtprod = sqrt(double(S1*S2*S3));
+  float sqrtprod = sqrtf(float(S1*S2*S3));
   for(int i=0; i<S1; i++)
 	  for(int j=0; j<S2; j++)
 		  for(int k=0; k<S3; k++)
@@ -948,10 +948,10 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
 {
   /// Make a duplicate of class X to Class T
   CpxNumTns T(X);
-  fftw_plan p = fftw_plan_dft_3d(N3, N2, N1, (fftw_complex*)T.data(), (fftw_complex*)T.data(), FFTW_FORWARD, FFTW_ESTIMATE);
-  fftw_execute(p);
+  fftwf_plan p = fftwf_plan_dft_3d(N3, N2, N1, (fftwf_complex*)T.data(), (fftwf_complex*)T.data(), FFTW_FORWARD, FFTW_ESTIMATE);
+  fftwf_execute(p);
 
-  double sqrtprod = sqrt(double(N1*N2*N3));
+  float sqrtprod = sqrt(float(N1*N2*N3));
 
   for(int i=0; i<N1; i++)
 	  for(int j=0; j<N2; j++)
@@ -961,7 +961,7 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
 			  T(i,j,k) /= sqrtprod;
 		  }
 
-  fftw_destroy_plan(p);
+  fftwf_destroy_plan(p);
 
   /// Generate a class with 6 variables and a long one dimensional pointer with the size of (N1* N2* N3) ***************
   CpxOffTns F(N1, N2, N3);
@@ -972,13 +972,13 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
 
   if(ac==1)
   {
-		double L1 = 4.0*N1/3.0;
-		double L2 = 4.0*N2/3.0;
-		double L3 = 4.0*N3/3.0;
+		float L1 = 4.0*N1/3.0;
+		float L2 = 4.0*N2/3.0;
+		float L3 = 4.0*N3/3.0;
 
 		int S1, S2, S3;
 		int F1, F2, F3;
-		double R1, R2, R3;
+		float R1, R2, R3;
 		fdct3d_rangecompute(L1, L2, L3, S1, S2, S3, F1, F2, F3, R1, R2, R3);
 
 		IntOffVec t1(S1);
@@ -1023,12 +1023,12 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
   if(ac==1) {
 	{
 	  int s = 0;
-	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
+	  float L1 = 4.0*N1/3.0 / pow2(L-1-s);	 float L2 = 4.0*N2/3.0 / pow2(L-1-s);	 float L3 = 4.0*N3/3.0 / pow2(L-1-s);
 	  fdct3d_forward_center(L1,L2,L3,s, O, C, cellStruct);
 	}
 
 	for(int s=1; s<L; s++) {
-	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
+	  float L1 = 4.0*N1/3.0 / pow2(L-1-s);	 float L2 = 4.0*N2/3.0 / pow2(L-1-s);	 float L3 = 4.0*N3/3.0 / pow2(L-1-s);
 	  int nd = nbdstz_coarse * pow2(s/2);
 	  fdct3d_forward_angles(L1,L2,L3,s, nd, O, C, cellStruct);
 	}
@@ -1036,23 +1036,27 @@ int fdct3d_forward(int N1, int N2, int N3, int nbscales, int nbdstz_coarse, int 
   } else {
 	{
 	  int s = 0;
-	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);	 double L2 = 4.0*N2/3.0 / pow2(L-1-s);	 double L3 = 4.0*N3/3.0 / pow2(L-1-s);
+	  float L1 = 4.0*N1/3.0 / pow2(L-1-s);	 float L2 = 4.0*N2/3.0 / pow2(L-1-s);	 float L3 = 4.0*N3/3.0 / pow2(L-1-s);
 	  fdct3d_forward_center(L1,L2,L3,s, O, C, cellStruct);
 	}
 	for(int s=1; s<L-1; s++) {
-	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);
-	  double L2 = 4.0*N2/3.0 / pow2(L-1-s);
-	  double L3 = 4.0*N3/3.0 / pow2(L-1-s);
+	  float L1 = 4.0*N1/3.0 / pow2(L-1-s);
+	  float L2 = 4.0*N2/3.0 / pow2(L-1-s);
+	  float L3 = 4.0*N3/3.0 / pow2(L-1-s);
 	  int nd = nbdstz_coarse * pow2(s/2);
 	  fdct3d_forward_angles(L1,L2,L3,s, nd, O, C, cellStruct);
 	}
 	{
 	  int s = L-1;
-	  double L1 = 4.0*N1/3.0 / pow2(L-1-s);
-	  double L2 = 4.0*N2/3.0 / pow2(L-1-s);
-	  double L3 = 4.0*N3/3.0 / pow2(L-1-s);
+	  float L1 = 4.0*N1/3.0 / pow2(L-1-s);
+	  float L2 = 4.0*N2/3.0 / pow2(L-1-s);
+	  float L3 = 4.0*N3/3.0 / pow2(L-1-s);
 	  fdct3d_forward_wavelet(L1,L2,L3,s, O, C, cellStruct);
 	}
   }
+
+  O.~OffTns();
+  F.~OffTns();
+
   return 0;
 }

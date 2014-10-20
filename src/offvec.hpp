@@ -93,7 +93,7 @@ template <class F> inline void clear(OffVec<F>& vec)
 }
 
 typedef OffVec<int>    IntOffVec;
-typedef OffVec<double> DblOffVec;
+typedef OffVec<float> DblOffVec;
 typedef OffVec<cpx>    CpxOffVec;
 
 #endif

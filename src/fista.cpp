@@ -47,14 +47,15 @@ int main(int argc, char** argv)
    PARAMS params;
 
    /* Data initialisation */
-   fsp.bpTol = 0.000001;
-   fsp.maxItr = 10;
+   fsp.maxItr = 2;
    fsp.eigenItr = 10;
-   fsp.stat = 0;
-   fsp.lambda = 0.0;
+   fsp.lambda.push_back(0.06);
+   fsp.lambda.push_back(0.03);
+   fsp.lambda.push_back(0.05);
+
    fsp.inDataFileName = "/home/entropy/workspace/fdct3d/src/Data/data_gain.bin";
    fsp.sampleMatFileName = "/home/entropy/workspace/fdct3d/src/Data/sample_mat.bin";
-   fsp.outDataFileName = "/home/entropy/workspace/fdct3d/src/Data/reconData.bin";
+   fsp.outDataFileName = "/home/entropy/workspace/fdct3d/src/Data/reconData1.bin";
    fsp.testDataFileName = "/home/entropy/workspace/fdct3d/src/Data/testData.bin";
 
    /* Data initialisation for 3D FFT ****************************************************/
@@ -93,9 +94,7 @@ int main(int argc, char** argv)
 
    fsc.readSampleMat(fsp.sampleMatFileName, fsp.n1, fsp.n2, fsp.n3, params.samplMat);
 
-   fsp.alpha = 1; //*fsc.powerEigen(init, &fsp,  &params);
-
-   fsp.thresh = fsp.lambda/(2*fsp.alpha);
+   fsp.alpha = 1.1; //*fsc.powerEigen(init, &fsp,  &params);
 
    params.cellStruct.clear();
 
@@ -103,6 +102,7 @@ int main(int argc, char** argv)
    start = clock();
    fsc.Reconstruct(&fsp, &params, &fsc);
    finish = clock();
+
 
    std::cout << "Time: " << (finish-start)/double(CLOCKS_PER_SEC) << " Seconds " <<std::endl;
 
@@ -112,4 +112,3 @@ int main(int argc, char** argv)
    params.reset();
    return 0;
 }
-

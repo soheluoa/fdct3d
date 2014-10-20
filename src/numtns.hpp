@@ -39,8 +39,16 @@ public:
   NumTns& operator=(const NumTns& C) {
 	 if(_m>0 && _n>0 && _p>0) {		delete[] _data; _data = NULL; }
 	 _m = C._m; _n=C._n; _p=C._p;
-	 if(_m>0 && _n>0 && _p>0) {		_data = new F[_m*_n*_p]; assert( _data!=NULL );	 memset(_data, 0, _m*_n*_p*sizeof(F));	 } else		_data = NULL;
-	 if(_m>0 && _n>0 && _p>0) {		memcpy( _data, C._data, _m*_n*_p*sizeof(F) );	 }
+	 if(_m>0 && _n>0 && _p>0) {
+		 _data = new F[_m*_n*_p];
+		 assert( _data!=NULL );
+		 memset(_data, 0, _m*_n*_p*sizeof(F));
+	 }
+	 else
+		 _data = NULL;
+	 if(_m>0 && _n>0 && _p>0) {
+		 memcpy( _data, C._data, _m*_n*_p*sizeof(F) );
+	 }
 	 return *this;
   }
   void resize(int m, int n, int p) {
@@ -75,7 +83,7 @@ template <class F> inline void clear(NumTns<F>& T)
 }
 
 typedef NumTns<int>    IntNumTns;
-typedef NumTns<double> DblNumTns;
+typedef NumTns<float> DblNumTns;
 typedef NumTns<cpx>    CpxNumTns;
 
 //template <class F> inline istream& operator>>(istream& is, NumTns<F>& tns);

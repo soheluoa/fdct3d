@@ -34,7 +34,7 @@ class fistaCore{
 
 	public:
 			void Reconstruct(fistaParams *fsp, PARAMS* params, fistaCore* fsc);
-			double powerEigen(CpxNumTns &start, fistaParams* fsp,  PARAMS* params);
+			float powerEigen(CpxNumTns &start, fistaParams* fsp,  PARAMS* params);
 			void readSampleMat(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<int> > &sampleMat);
 	/**
 	 * Access modifier of these methods are made private to prohibit the execution of these functions from anywhere except the object of this class
@@ -47,13 +47,13 @@ class fistaCore{
 
 			inline void computeObsData(std::string fileName, int n1, int n2, int n3, std::vector<std::vector<std::vector<float> > > &data, std::vector<std::vector<int> > &sampleMat, CpxNumTns &obsData );
 
-			void project(std::vector<std::vector<std::vector<double > > >x, double tau);
-
 			inline int dotProduct(int n1, int n2, int n3, std::vector<std::vector<int> > &sampleMat, CpxNumTns &data );
 
-			inline double norm( CpxNumTns &x, int normType);
+			inline float norm( CpxNumTns &x, int normType);
 
-			void wthresh(double thresh, std::vector< std::vector<CpxNumTns> > &x, std::vector<std::vector<CpxNumTns > >&y, std::vector<std::vector<std::vector<int> > > &cellStruct);
+			inline float normVector( std::vector<std::vector<std::vector<float> > > &data, int normType);
+
+			inline void wthresh(float thresh, std::vector<std::vector<CpxNumTns > >&x, std::vector<std::vector<CpxNumTns > >&y, std::vector<std::vector<std::vector<int> > > &cellStruct );
 
 			inline void writeBinFile(std::string fileName, int n1, int n2, int n3, CpxNumTns &data);
 

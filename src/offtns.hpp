@@ -83,7 +83,7 @@ template <class F> inline void clear(OffTns<F>& T)
 }
 
 typedef OffTns<int>    IntOffTns;
-typedef OffTns<double> DblOffTns;
+typedef OffTns<float> DblOffTns;
 typedef OffTns<cpx>    CpxOffTns;
 
 //template <class F> inline istream& operator>>(istream& is, OffTns<F>& tns);

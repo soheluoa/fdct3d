@@ -41,7 +41,7 @@ inline int fdct3d_ifftshift(int N1, int N2, int N3, CpxOffTns& O, CpxNumTns& T)
   return 0;
 }
 
-inline int fdct3d_window(double x, double& l, double& r)
+inline int fdct3d_window(float x, float& l, float& r)
 {
   if(x<=0) {
 	 l = 0;	 r = 1;
@@ -50,17 +50,17 @@ inline int fdct3d_window(double x, double& l, double& r)
   } else {
 	 l = exp(1-1/(1-exp(1-1/(1-x))));
 	 r = exp(1-1/(1-exp(1-1/x)));
-	 double norm = sqrt(l*l+r*r);
+	 float norm = sqrt(l*l+r*r);
 	 l /= norm;
 	 r /= norm;
   }
   return 0;
 }
 
-inline int fdct3d_rangecompute(double XL1, double XL2, double XL3,
+inline int fdct3d_rangecompute(float XL1, float XL2, float XL3,
 									 int& XS1, int& XS2, int& XS3,
 									 int& XF1, int& XF2, int& XF3,
-									 double& XR1, double& XR2, double& XR3)
+									 float& XR1, float& XR2, float& XR3)
 {
   XS1 = 2*int(floor(XL1/2))+1;
   XS2 = 2*int(floor(XL2/2))+1;
@@ -76,17 +76,17 @@ inline int fdct3d_rangecompute(double XL1, double XL2, double XL3,
   return 0;
 }
 
-inline int fdct3d_lowpass(double L1, DblOffVec& lowpass)
+inline int fdct3d_lowpass(float L1, DblOffVec& lowpass)
 {
   int S1 = 2*int(floor(L1/2))+1;
   int F1 = int(floor(L1/2));
-  double R1 = L1/2;
+  float R1 = L1/2;
   
   assert(lowpass.m()>=S1);
-  setvalue(lowpass, double(0.0));
+  setvalue(lowpass, float(0.0));
   for(int i=-F1; i<=0; i++) {
-	 double x = (i+R1)/(R1/2);
-	 double l,r; fdct3d_window(x, l, r);
+	 float x = (i+R1)/(R1/2);
+	 float l,r; fdct3d_window(x, l, r);
 	 lowpass(i) = l;
 	 lowpass(-i) = l;
   }
@@ -94,7 +94,7 @@ inline int fdct3d_lowpass(double L1, DblOffVec& lowpass)
   return 0;
 }
 
-inline int fdct3d_lowpasscompute(double XL1, double XL2, double XL3, DblOffTns& lowpass)
+inline int fdct3d_lowpasscompute(float XL1, float XL2, float XL3, DblOffTns& lowpass)
 {
   int XS1 = 2*int(floor(XL1/2))+1;
   int XS2 = 2*int(floor(XL2/2))+1;
@@ -104,28 +104,28 @@ inline int fdct3d_lowpasscompute(double XL1, double XL2, double XL3, DblOffTns& 
   int XF2 = int(floor(XL2/2));
   int XF3 = int(floor(XL3/2));
   //offset on either side
-  double XR1 = XL1/2;
-  double XR2 = XL2/2;
-  double XR3 = XL3/2;
+  float XR1 = XL1/2;
+  float XR2 = XL2/2;
+  float XR3 = XL3/2;
   
-  DblOffVec lowpass1(XS1); setvalue(lowpass1,1.0);
+  DblOffVec lowpass1(XS1); setvalue(lowpass1,float(1.0));
   for(int i=-XF1; i<-XR1/2; i++) {
-	 double x = (i+XR1)/(XR1/2);
-	 double l,r; fdct3d_window(x, l, r);
+	 float x = (i+XR1)/(XR1/2);
+	 float l,r; fdct3d_window(x, l, r);
 	 lowpass1(i) = l;
 	 lowpass1(-i) = l;
   }  //cerr<<lowpass1;
-  DblOffVec lowpass2(XS2); setvalue(lowpass2,1.0);
+  DblOffVec lowpass2(XS2); setvalue(lowpass2,float(1.0));
   for(int i=-XF2; i<-XR2/2; i++) {
-	 double x = (i+XR2)/(XR2/2);
-	 double l,r; fdct3d_window(x, l, r);
+	 float x = (i+XR2)/(XR2/2);
+	 float l,r; fdct3d_window(x, l, r);
 	 lowpass2(i) = l;
 	 lowpass2(-i) = l;
   }  //cerr<<lowpass2;
-  DblOffVec lowpass3(XS3); setvalue(lowpass3,1.0);
+  DblOffVec lowpass3(XS3); setvalue(lowpass3,float(1.0));
   for(int i=-XF3; i<-XR3/2; i++) {
-	 double x = (i+XR3)/(XR3/2);
-	 double l,r; fdct3d_window(x, l, r);
+	 float x = (i+XR3)/(XR3/2);
+	 float l,r; fdct3d_window(x, l, r);
 	 lowpass3(i) = l;
 	 lowpass3(-i) = l;
   }  //cerr<<lowpass3;
@@ -316,9 +316,9 @@ inline int fdct3d_rotate_backward(int f, CpxOffTns& X, CpxOffTns& T)
   return 0;
 }
 
-inline int fdct3d_globalpou_shape(double lt, double rt, double u, double v, double& s)
+inline int fdct3d_globalpou_shape(float lt, float rt, float u, float v, float& s)
 {
-  double t,a,b;
+  float t,a,b;
   t = (u-lt)/(rt-lt);
   if(t<=0) a = 1.0; else if(t>=1) a = 0.0; else a = exp(2.0*exp(-1.0/(t))/(t-1.0));
   t = (v-lt)/(rt-lt);
@@ -327,48 +327,48 @@ inline int fdct3d_globalpou_shape(double lt, double rt, double u, double v, doub
   return 0;
 }
 
-inline int fdct3d_globalpou(double tht, double phi, double buf, double& pou)
+inline int fdct3d_globalpou(float tht, float phi, float buf, float& pou)
 {
-  double lt = M_PI/4 - buf;  double rt = M_PI/4 + buf;
+  float lt = M_PI/4 - buf;  float rt = M_PI/4 + buf;
   if(abs(tht)<=lt && abs(phi)<=lt)
 	 pou = 1;
   else if(abs(tht)>=rt || abs(phi)>=rt)
 	 pou = 0;
   else {
-	 double tt = tan(abs(tht));
-	 double tp = tan(abs(phi));
-	 double pa[2];	pa[0] = abs(tht);	pa[1] = abs(phi);
-	 double pb[2]; pb[0] = atan2(tp,tt); pb[1] = atan2(1,tt);
-	 double pc[2]; pc[0] = atan2(tt,tp); pc[1] = atan2(1,tp);
-	 double sa; fdct3d_globalpou_shape(lt, rt, pa[0], pa[1], sa);
-	 double sb; fdct3d_globalpou_shape(lt, rt, pb[0], pb[1], sb);
-	 double sc; fdct3d_globalpou_shape(lt, rt, pc[0], pc[1], sc);
+	 float tt = tan(abs(tht));
+	 float tp = tan(abs(phi));
+	 float pa[2];	pa[0] = abs(tht);	pa[1] = abs(phi);
+	 float pb[2]; pb[0] = atan2(tp,tt); pb[1] = atan2(1,tt);
+	 float pc[2]; pc[0] = atan2(tt,tp); pc[1] = atan2(1,tp);
+	 float sa; fdct3d_globalpou_shape(lt, rt, pa[0], pa[1], sa);
+	 float sb; fdct3d_globalpou_shape(lt, rt, pb[0], pb[1], sb);
+	 float sc; fdct3d_globalpou_shape(lt, rt, pc[0], pc[1], sc);
 	 pou = sqrt(sa/(sa+sb+sc));
   }
   return 0;
 }
 
-inline double energy(CpxOffVec& m)
+inline float energy(CpxOffVec& m)
 {
-  double val=0;
+  float val=0;
   cpx* data = m.data();
   for(int i=0; i<m.m(); i++) {	 //val += data[i].re*data[i].re + data[i].im*data[i].im;
 	 val += norm(data[i]);
   }
   return val;
 }
-inline double energy(CpxOffMat& m)
+inline float energy(CpxOffMat& m)
 {
-  double val=0;
+  float val=0;
   cpx* data = m.data();
   for(int i=0; i<m.m()*m.n(); i++) {	 //val += data[i].re*data[i].re + data[i].im*data[i].im;
 	 val += norm(data[i]);
   }
   return val;
 }
-inline double energy(CpxOffTns& m)
+inline float energy(CpxOffTns& m)
 {
-  double val=0;
+  float val=0;
   cpx* data = m.data();
   for(int i=0; i<m.m()*m.n()*m.p(); i++) {	 //val += data[i].re*data[i].re + data[i].im*data[i].im;
 	 val += norm(data[i]);
@@ -376,27 +376,27 @@ inline double energy(CpxOffTns& m)
   return val;
 }
 
-inline double energy(CpxNumVec& m)
+inline float energy(CpxNumVec& m)
 {
-  double val=0;
+  float val=0;
   cpx* data = m.data();
   for(int i=0; i<m.m(); i++) {	 //val += data[i].re*data[i].re + data[i].im*data[i].im;
 	 val += norm(data[i]);
   }
   return val;
 }
-inline double energy(CpxNumMat& m)
+inline float energy(CpxNumMat& m)
 {
-  double val=0;
+  float val=0;
   cpx* data = m.data();
   for(int i=0; i<m.m()*m.n(); i++) {	 //val += data[i].re*data[i].re + data[i].im*data[i].im;
 	 val += norm(data[i]);
   }
   return val;
 }
-inline double energy(CpxNumTns& m)
+inline float energy(CpxNumTns& m)
 {
-  double val=0;
+  float val=0;
   cpx* data = m.data();
   for(int i=0; i<m.m()*m.n()*m.p(); i++) {	 //val += data[i].re*data[i].re + data[i].im*data[i].im;
 	 val += norm(data[i]);

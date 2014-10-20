@@ -94,7 +94,7 @@ template <class F> inline void clear(NumMat<F>& M)
 }
 
 typedef NumMat<int>  IntNumMat;
-typedef NumMat<double> DblNumMat;
+typedef NumMat<float> DblNumMat;
 typedef NumMat<cpx>  CpxNumMat;
 
 #endif

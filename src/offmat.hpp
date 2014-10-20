@@ -56,7 +56,8 @@ public:
 //OUTPUT
 template <class F> inline ostream& operator<<( ostream& os, const OffMat<F>& mat)
 {
-  os<<mat.m()<<" "<<mat.n()<<" "<<mat.s()<<" "<<mat.t()<<endl;
+  os<<mat.m()<<" "<<mat.n()<<" "<<mat.s()<<" "<<mat.t();
+  std::cout<<std::endl;
   for(int i=mat.s(); i<mat.s()+mat.m(); i++) {
 	 for(int j=mat.t(); j<mat.t()+mat.n(); j++)
 		os<<" "<<mat(i,j);
@@ -78,7 +79,7 @@ template <class F> inline void clear(OffMat<F>& M)
 }
 
 typedef OffMat<int>    IntOffMat;
-typedef OffMat<double> DblOffMat;
+typedef OffMat<float> DblOffMat;
 typedef OffMat<cpx>    CpxOffMat;
 
 #endif

@@ -88,7 +88,7 @@ template <class F> inline void clear(NumVec<F>& vec)
 }
 
 typedef NumVec<int>    IntNumVec;
-typedef NumVec<double> DblNumVec;
+typedef NumVec<float> DblNumVec;
 typedef NumVec<cpx>    CpxNumVec;
 
 #endif
