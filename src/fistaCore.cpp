@@ -173,17 +173,14 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 
 				params->misFit.push_back(misFitVal);
 				tmpData.~NumTns();
-				std::cout << "Iteration completed" << " "<< itrNum << "---- Misfit " << " " << misFitVal << std::endl;
+				std::cout << "Iteration completed" << "--------"<< itrNum+1 << "------------ Misfit ------ " << misFitVal << std::endl;
 			}
 
 			// y = Ax; input: params->tempCurvCoeff, output: params->reconData
 			fdct3d_inverse(fsp->n3,fsp->n2,fsp->n1,params->nbscales,params->nbdstz_coarse, params->ac, tempCurvCoeff, reconData);
-
-			// Writing the binary file for the reconstructed data
-			writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, reconData);
+			
 			normVal1 = normVector(params->inData, 2);
 			normVal = norm(reconData, 2);
-
 			for(int i=0; i<reconData._m; i++)
 				for( int j=0; j<reconData._n; j++)
 					for(int k=0; k<reconData._p; k++)
@@ -195,19 +192,23 @@ void fistaCore::Reconstruct(fistaParams* fsp, PARAMS* params, fistaCore* fsc)
 			for(int i=0; i<reconData._m; i++)
 				for( int j=0; j<reconData._n; j++)
 					for(int k=0; k<reconData._p; k++)
-						normVal2 += powf((biasFactor*real(reconData(i,j,k)) - params->inData[i][j][k]),2);
+						normVal2 += powf(((biasFactor*real(reconData(i,j,k))) - params->inData[i][j][k]),2);
 
+			// Computing the Q-factor ******************************************
 			params->qFactor = 10*log10(powf(normVal1,2)/normVal2);
 			std::cout << "Q-factor: " << params->qFactor <<std::endl;
+
+			// Writing the binary file for the reconstructed data **************
+			writeBinFile(fsp->outDataFileName, fsp->n1, fsp->n2, fsp->n3, lambdaNum, reconData, fsp->tempDataFileName, biasFactor);
 
 			tmpData.~NumTns();                  // Hx
 			diffData.~NumTns();                 // y-Hx
 			reconData.~NumTns();                // recon data
-			//curvCoeff.clear();            		// x
-			tempCurvCoeff.clear();        		// Yk
-			addCurvCoeff.clear();         		// temp_Yk_mat
-			iterTempCurvCoeff.clear();    		// tempx
-			iterDiffTempCurvCoeff.clear();		// diff coeff
+			//curvCoeff.clear();                // x
+			tempCurvCoeff.clear();        	    // Yk
+			addCurvCoeff.clear();         	    // temp_Yk_mat
+			iterTempCurvCoeff.clear();    	    // tempx
+			iterDiffTempCurvCoeff.clear();	    // diff coeff
 
 			/*system("cd /home/entropy/workspace/fdct3d/src/");
 			system("./reconCube.sh");*/
@@ -493,12 +494,19 @@ float fistaCore::powerEigen(CpxNumTns &start, fistaParams* fsp,  PARAMS* params)
 }
 
 /*  Write the binary file of the reconstructed seismic data with the size of ( n1 X n2 X n3 )***************/
-inline void fistaCore::writeBinFile(std::string fileName,int n1, int n2, int n3, CpxNumTns &data)
+inline void fistaCore::writeBinFile(std::string fileName,int n1, int n2, int n3, int lambdaNum, CpxNumTns &data, std::string tempfileName, float biasFactor)
 {
 	int fsize;
 	FILE *fp;
 	fp = fopen(fileName.c_str(), "rb");
 	float *temp;
+
+	std::string num;
+	ostringstream strNum;
+
+	strNum << lambdaNum;
+
+	num = strNum.str();
 
 	fsize = n1 * n2* n3;
 	temp = (float *) malloc(sizeof(float) * fsize);
@@ -506,9 +514,14 @@ inline void fistaCore::writeBinFile(std::string fileName,int n1, int n2, int n3,
 	for(int i=0; i<n3; i++)
 		for(int j=0; j<n2; j++)
 			for(int k=0; k<n1; k++)
-				temp[i*n2*n1+j*n1+k] = real(data(i,j,k));
+				temp[i*n2*n1+j*n1+k] = biasFactor*real(data(i,j,k));
 
-	fp = fopen(fileName.c_str(), "w");
+	tempfileName = fileName + num;
+	tempfileName = tempfileName + std::string(".bin");
+
+	//std::cout << tempfileName << std::endl;
+
+	fp = fopen(tempfileName.c_str(), "w");
 	fwrite(temp,sizeof(float),fsize,fp);
 	fclose(fp);
 }

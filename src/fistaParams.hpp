@@ -33,6 +33,7 @@ public:
     std::string outDataFileName;   					/// Absolute path of the observed seismic data file
     std::string sampleMatFileName;   				/// Absolute path of the sample data file
     std::string testDataFileName;   				/// Absolute path of the test case data file
+    std::string tempDataFileName;   					/// Absolute path of the observed seismic data file
 
 	/******** clear configuration variables **********/
 	void reset()

@@ -55,7 +55,7 @@ class fistaCore{
 
 			inline void wthresh(float thresh, std::vector<std::vector<CpxNumTns > >&x, std::vector<std::vector<CpxNumTns > >&y, std::vector<std::vector<std::vector<int> > > &cellStruct );
 
-			inline void writeBinFile(std::string fileName, int n1, int n2, int n3, CpxNumTns &data);
+			inline void writeBinFile(std::string fileName,int n1, int n2, int n3, int lambdaNum, CpxNumTns &data, std::string tempfileName, float biasFactor);
 
 };
 

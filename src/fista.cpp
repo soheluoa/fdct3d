@@ -21,7 +21,7 @@ int optionsCreate(const char* optfile, map<string,string>& options)
 {
   options.clear();
   ifstream fin(optfile);
-  fin.open("/home/entropy/workspace/fdct3d/src/params.txt");
+  fin.open("/global/scratch/bhuiyan/fdct3d1/src/params.txt");
   assert(fin.good());
 
   string name;
@@ -47,21 +47,24 @@ int main(int argc, char** argv)
    PARAMS params;
 
    /* Data initialisation */
-   fsp.maxItr = 2;
+   fsp.maxItr = 190;
    fsp.eigenItr = 10;
-   fsp.lambda.push_back(0.06);
-   fsp.lambda.push_back(0.03);
-   fsp.lambda.push_back(0.05);
 
-   fsp.inDataFileName = "/home/entropy/workspace/fdct3d/src/Data/data_gain.bin";
-   fsp.sampleMatFileName = "/home/entropy/workspace/fdct3d/src/Data/sample_mat.bin";
-   fsp.outDataFileName = "/home/entropy/workspace/fdct3d/src/Data/reconData1.bin";
-   fsp.testDataFileName = "/home/entropy/workspace/fdct3d/src/Data/testData.bin";
+   /*fsp.lambda.push_back(0.009);
+   fsp.lambda.push_back(0.03);
+   fsp.lambda.push_back(0.05);*/
+
+   fsp.lambda.push_back(0.004);
+   fsp.lambda.push_back(0.003);
+   fsp.lambda.push_back(0.0035);
+
+   fsp.inDataFileName = "/global/scratch/bhuiyan/fdct3d1/src/Data1/data_gain.bin";
+   fsp.sampleMatFileName = "/global/scratch/bhuiyan/fdct3d1/src/Data1/sampleMat.bin";
+   fsp.outDataFileName = "/global/scratch/bhuiyan/fdct3d1/src/Data1/reconData";
 
    /* Data initialisation for 3D FFT ****************************************************/
-   params.ac = 0;
-
-   assert(argc==3);
+   params.ac = 1;
+   assert(argc==2);
    map<string, string> opts;
    optionsCreate(argv[2], opts);
    map<string,string>::iterator mi;
@@ -89,7 +92,7 @@ int main(int argc, char** argv)
  		  for(int k=0; k<fsp.n1; k++)
  			  init(i,j,k) = cpx(1.0, 0.0);
 
-   // Initialise the parameters for 3D curvelet transformation ***************************
+   //* Initialise the parameters for 3D curvelet transformation ***************************
    fdct3d_param(fsp.n3,fsp.n2,fsp.n1,params.nbscales,params.nbdstz_coarse,params.ac,params.fxs,params.fys,params.fzs, params.nxs,params.nys,params.nzs);
 
    fsc.readSampleMat(fsp.sampleMatFileName, fsp.n1, fsp.n2, fsp.n3, params.samplMat);
@@ -102,11 +105,9 @@ int main(int argc, char** argv)
    start = clock();
    fsc.Reconstruct(&fsp, &params, &fsc);
    finish = clock();
-
-
    std::cout << "Time: " << (finish-start)/double(CLOCKS_PER_SEC) << " Seconds " <<std::endl;
 
-   /** Clearing the memory space **********************************************************/
+   //* Clearing the memory space **********************************************************/
    std::cout << "Cleared the memory space." <<std::endl;
    fsp.reset();
    params.reset();
