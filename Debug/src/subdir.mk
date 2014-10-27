@@ -30,12 +30,14 @@ CPP_DEPS += \
 ./src/fista.d \
 ./src/fistaCore.d 
 
+FFTW=/global/software/fftw/fftw322/intel1214_shared_single
+LDFLAGS=-Wl,-rpath=/global/software/fftw/fftw322/intel1214_shared_single/lib
 
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross G++ Compiler'
-	g++ -Ifftw3f -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I$(FFTW)/include -L$(FFTW)/lib $(LDFLAGS) -lfftw3f -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
