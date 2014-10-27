@@ -6,6 +6,10 @@
 
 RM := rm -rf
 
+FFTW=/global/software/fftw/fftw322/intel1214_shared_single
+
+LDFLAGS=-Wl,-rpath=/global/software/fftw/fftw322/intel1214_shared_single/lib
+
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include src/subdir.mk
@@ -40,11 +44,12 @@ endif
 # All Target
 all: fdct3d
 
+
 # Tool invocations
 fdct3d: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++  -o "fdct3d" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "fdct3d" -I$(FFTW)/include -L$(FFTW)/lib $(OBJS) $(USER_OBJS) $(LIBS) $(LDFLAGS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
